@@ -4,7 +4,7 @@
 # frame_num must be 4n+1 (121 = 5 s, 241 = 10 s). Steps 50, 1280*704, 24 fps.
 source "$(dirname "$0")/../scripts/common.sh"
 header
-WAN_DIR=/root/wan-code
+WAN_DIR=/workspace-global/code/wan2.2@1ea34ff
 cd "$WAN_DIR"
 log "WAN_COMMIT_ACTUAL $(git rev-parse HEAD)"
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
