@@ -28,6 +28,9 @@ if [ ! -x /root/venv_cap/bin/python ]; then
   /root/venv_cap/bin/pip install -q openai-whisper
 fi
 /root/venv_cap/bin/python -c "import whisper; whisper.load_model('base', download_root='/workspace-global/models/whisper'); print('WHISPER_OK')" 2>&1 | tee -a "$LOG"
+# System libraries MediaPipe loads at import (libEGL.so.1 is an apt package, not a pip one)
+apt-get update -qq && apt-get install -y -qq libegl1 libgl1 libgles2 > /tmp/apt.log 2>&1 || { log APT_FAIL; tail -n 5 /tmp/apt.log | tee -a "$LOG"; exit 1; }
+log APT_OK
 # Ditto venv: packages from the 2026-11-16 install list, pinned where the notes pin them
 if [ ! -x /root/venv_ditto/bin/python ]; then
   python3 -m venv --system-site-packages /root/venv_ditto
