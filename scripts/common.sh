@@ -2,6 +2,7 @@
 # Shared helpers. Every run writes its commit and wrapper hashes as the first log lines.
 set -euo pipefail
 RUN_NAME="${RUN_NAME:?set RUN_NAME}"
+git config --global --add safe.directory "*" 2>/dev/null || true
 LOG_DIR="${LOG_DIR:-/workspace-global/logs/${RUN_NAME}}"
 mkdir -p "$LOG_DIR"
 LOG="$LOG_DIR/run.log"
