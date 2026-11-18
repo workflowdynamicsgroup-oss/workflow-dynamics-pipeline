@@ -15,7 +15,7 @@ pipi() { pip install -q --find-links "$WHL" "$@" || pip install -q "$@"; }
 # Chatterbox venv (verified recipe 2026-11-16)
 # Keep the system torch and numpy exactly as they are
 python3 -c "import torch, numpy; print(torch.__version__, numpy.__version__)" | tee -a "$LOG"
-pip freeze 2>/dev/null | grep -E "^(torch|torchaudio|torchvision|numpy)==" > /root/constraints.txt || true
+pip freeze 2>/dev/null | grep -E "^(torch|torchaudio|torchvision)==" > /root/constraints.txt || true  # torch only; numpy is set per venv
 if [ ! -x /root/venv_cb/bin/python ]; then
   python3 -m venv --system-site-packages /root/venv_cb
   /root/venv_cb/bin/pip install -q -c /root/constraints.txt --no-deps chatterbox-tts==0.1.7

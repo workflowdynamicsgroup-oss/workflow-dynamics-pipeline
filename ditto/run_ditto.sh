@@ -6,8 +6,10 @@ source "$(dirname "$0")/../scripts/common.sh"
 header
 DITTO_DIR=/workspace-global/code/ditto-talkinghead@c3e47ee
 cd "$DITTO_DIR"
-[ "$(git rev-parse HEAD)" = "" ] || { log "DITTO_COMMIT_MISMATCH"; exit 1; }
-log "DITTO_COMMIT "
+PINNED=c3e47eee2e626500017a0556b470d6d4182f85e8
+[ "$(git rev-parse HEAD)" = "$PINNED" ] || { log "DITTO_COMMIT_MISMATCH $(git rev-parse HEAD)"; exit 1; }
+log "DITTO_COMMIT $PINNED"
+mkdir -p "$(dirname "$OUT")"
 export PYTHONFAULTHANDLER=1
 /root/venv_ditto/bin/python -u inference.py \
   --data_root "/workspace-global/ditto/checkpoints/ditto_pytorch" \
