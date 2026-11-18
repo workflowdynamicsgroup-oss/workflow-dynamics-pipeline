@@ -8,7 +8,7 @@ WAN_DIR=/workspace-global/code/wan2.2@1ea34ff
 cd "$WAN_DIR"
 log "WAN_COMMIT_ACTUAL $(git rev-parse HEAD)"
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-python3 -u generate.py \
+/root/venv_wan/bin/python -u generate.py \
   --task ti2v-5B \
   --size 1280*704 \
   --ckpt_dir /workspace-global/models/wan2.2-ti2v-5b \
