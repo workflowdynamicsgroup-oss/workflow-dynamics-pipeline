@@ -7,6 +7,8 @@ cd "$(dirname "$0")/.."
 : "${RUN_NAME:?set RUN_NAME}"
 OUTDIR=/workspace-global/outputs/$RUN_NAME
 OUT=$OUTDIR/ditto.mp4
+# Watchdog: whatever hangs, the pod terminates itself after WATCHDOG seconds (default 25 min)
+( sleep "${WATCHDOG:-1500}"; echo "WATCHDOG_FIRED: terminating pod"; bash scripts/self_delete.sh terminate ) &
 bash scripts/self_delete.sh check || { echo "SELF_CHECK_FAIL: aborting before any spend"; exit 1; }
 mkdir -p "$OUTDIR"
 (

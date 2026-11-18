@@ -15,11 +15,18 @@ DATA_ROOT=/workspace-global/ditto/checkpoints/ditto_pytorch
 CFG=/workspace-global/ditto/checkpoints/ditto_cfg/v0.4_hubert_cfg_pytorch.pkl
 python3 "$REPO/preflight/check_ditto_files.py" "$DATA_ROOT" "$CFG" "$AUDIO" "$PHOTO" 2>&1 | tee -a "$LOG"
 [ "${PIPESTATUS[0]}" = 0 ] || { log DITTO_FILES_FAIL; exit 1; }
+/root/venv_ditto/bin/python "$REPO/preflight/check_ditto_models.py" "$DATA_ROOT" 2>&1 | tee -a "$LOG"
+[ "${PIPESTATUS[0]}" = 0 ] || { log DITTO_MODELS_FAIL; exit 1; }
 export PYTHONFAULTHANDLER=1
-/root/venv_ditto/bin/python -u inference.py \
+set +e
+timeout "${DITTO_TIMEOUT:-900}" /root/venv_ditto/bin/python -u inference.py \
   --data_root "/workspace-global/ditto/checkpoints/ditto_pytorch" \
   --cfg_pkl "/workspace-global/ditto/checkpoints/ditto_cfg/v0.4_hubert_cfg_pytorch.pkl" \
   --audio_path "$AUDIO" \
   --source_path "$PHOTO" \
   --output_path "$OUT" 2>&1 | tee -a "$LOG"
+RC=${PIPESTATUS[0]}
+set -e
+[ "$RC" = 124 ] && { log "DITTO_TIMEOUT after ${DITTO_TIMEOUT:-900}s (possible writer deadlock)"; exit 1; }
+[ "$RC" = 0 ] || { log "DITTO_FAIL exit=$RC"; exit 1; }
 test -s "$OUT" && log "DITTO_DONE $OUT"
