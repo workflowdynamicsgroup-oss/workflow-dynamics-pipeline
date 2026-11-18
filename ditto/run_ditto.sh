@@ -4,7 +4,7 @@
 # Usage: RUN_NAME=... AUDIO=... PHOTO=... OUT=... bash ditto/run_ditto.sh
 source "$(dirname "$0")/../scripts/common.sh"
 header
-DITTO_DIR=/workspace-global/ditto/code/ditto-talkinghead
+DITTO_DIR=/root/ditto
 cd "$DITTO_DIR"
 log "DITTO_COMMIT_EXPECTED c3e47eee2e626500017a0556b470d6d4182f85e8"
 log "DITTO_COMMIT_ACTUAL $(git rev-parse HEAD 2>/dev/null || echo unknown)"
