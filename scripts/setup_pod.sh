@@ -4,8 +4,8 @@
 set -euo pipefail
 source "$(dirname "$0")/common.sh"
 header
-DITTO_DIR=/workspace-global/code/ditto-talkinghead@
-WAN_DIR=/workspace-global/code/wan2.2@
+DITTO_DIR=/workspace-global/code/ditto-talkinghead@c3e47ee
+WAN_DIR=/workspace-global/code/wan2.2@1ea34ff
 for d in "$DITTO_DIR" "$WAN_DIR"; do
   [ -d "$d/.git" ] || { log "MISSING_CODE $d (run scripts/publish_code_to_volume.sh first)"; exit 1; }
   log "CODE_OK $d $(git -C "$d" rev-parse HEAD)"
@@ -27,7 +27,7 @@ fi
 # Ditto venv: packages from the 2026-11-16 install list, pinned where the notes pin them
 if [ ! -x /root/venv_ditto/bin/python ]; then
   python3 -m venv --system-site-packages /root/venv_ditto
-  /root/venv_ditto/bin/pip install -q "numpy==2.0.1" "onnxruntime-gpu==1.20.2" tqdm librosa soundfile filetype cuda-python cython scikit-image colored tifffile einops imageio imageio-ffmpeg mediapipe libEGL
+  /root/venv_ditto/bin/pip install -q "numpy==2.0.1" "onnxruntime-gpu==1.20.2" tqdm librosa soundfile filetype cuda-python cython scikit-image colored tifffile einops imageio imageio-ffmpeg mediapipe
 fi
 # Wan venv: requirements plus the three packages the README omits
 if [ ! -x /root/venv_wan/bin/python ]; then

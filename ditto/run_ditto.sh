@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Ditto avatar, PyTorch path (TensorRT paths are Ditto's default and are not used).
-# Code: /workspace-global/code/ditto-talkinghead@ (pinned commit )
+# Code: /workspace-global/code/ditto-talkinghead@c3e47ee (pinned commit c3e47eee2e626500017a0556b470d6d4182f85e8)
 # Usage: RUN_NAME=... AUDIO=... PHOTO=... OUT=... bash ditto/run_ditto.sh
 source "$(dirname "$0")/../scripts/common.sh"
 header
-DITTO_DIR=/workspace-global/code/ditto-talkinghead@
+DITTO_DIR=/workspace-global/code/ditto-talkinghead@c3e47ee
 cd "$DITTO_DIR"
 [ "$(git rev-parse HEAD)" = "" ] || { log "DITTO_COMMIT_MISMATCH"; exit 1; }
 log "DITTO_COMMIT "
