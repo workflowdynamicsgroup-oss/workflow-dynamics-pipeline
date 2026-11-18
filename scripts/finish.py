@@ -26,6 +26,10 @@ try:
         if p.exists() and p.stat().st_size > 0:
             s3.upload_file(str(p), "workflowdynamic", f"outputs/{run}/{p.name}"); sent.append(f"outputs/{run}/{p.name}")
     status = "UPLOAD_OK " + " ".join(sent)
+    for key in sent:
+        if key.startswith("outputs/"):
+            url = s3.generate_presigned_url("get_object", Params={"Bucket": "workflowdynamic", "Key": key}, ExpiresIn=86400)
+            print(f"DOWNLOAD_24H {key} {url}")
 except Exception as e:
     status = f"UPLOAD_FAIL {type(e).__name__}: {e}"
 print(status)

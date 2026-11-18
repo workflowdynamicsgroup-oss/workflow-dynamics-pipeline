@@ -15,13 +15,14 @@ mkdir -p "$OUTDIR"
   set -e
   bash scripts/setup_pod.sh
   bash preflight/check_imports.sh
-  echo "This is a dry run of the pipeline." > /root/dry.txt
+  cp "${TEXT_FILE:-test/narration10.txt}" /root/dry.txt
   bash chatterbox/run_chatterbox.sh /root/dry.txt /root/dry.wav /workspace-global/inputs/me.wav
   AUDIO=/root/dry.wav PHOTO=/workspace-global/inputs/IMG_3004.png OUT="$OUT" bash ditto/run_ditto.sh
 )
 RC=$?
 /root/venv_cap/bin/pip install -q boto3 >/dev/null 2>&1 || python3 -m pip install -q --break-system-packages boto3 >/dev/null 2>&1
 PY=/root/venv_cap/bin/python; [ -x $PY ] || PY=python3
+for f in /root/dry.wav "$OUT"; do [ -s "$f" ] && echo "DURATION $f $(ffprobe -v error -show_entries format=duration -of csv=p=0 "$f" 2>/dev/null) s"; done
 $PY scripts/finish.py "$RUN_NAME" "$RC" "$OUT" /root/dry.wav
 sleep "${HOLD:-240}"
 bash scripts/self_delete.sh terminate

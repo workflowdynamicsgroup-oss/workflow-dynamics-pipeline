@@ -1,0 +1,1 @@
+This is a test of the video pipeline. I am checking that the voice, the avatar and the timing all work together before we build a full video.
