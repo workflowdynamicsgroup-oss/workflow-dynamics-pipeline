@@ -18,6 +18,12 @@ if [ ! -x /root/venv_cb/bin/python ]; then
   /root/venv_cb/bin/pip install -q --no-deps chatterbox-tts==0.1.7
   /root/venv_cb/bin/pip install -q "numpy<2"
 fi
+# Whisper for captions, on pod disk (pinned model: base)
+if [ ! -x /root/venv_cap/bin/python ]; then
+  python3 -m venv --system-site-packages /root/venv_cap
+  /root/venv_cap/bin/pip install -q openai-whisper
+fi
+/root/venv_cap/bin/python -c "import whisper; whisper.load_model('base', download_root='/workspace-global/models/whisper'); print('WHISPER_OK')" 2>&1 | tee -a "$LOG"
 # Ditto venv: packages from the 2026-11-16 install list, pinned where the notes pin them
 if [ ! -x /root/venv_ditto/bin/python ]; then
   python3 -m venv --system-site-packages /root/venv_ditto
