@@ -6,6 +6,7 @@ source "$(dirname "$0")/common.sh"
 header
 DITTO_DIR=/workspace-global/code/ditto-talkinghead@c3e47ee
 WAN_DIR=/workspace-global/code/wan2.2@1ea34ff
+cd "$(dirname "$0")/.."
 for d in "$DITTO_DIR" "$WAN_DIR"; do
   [ -d "$d/.git" ] || { log "MISSING_CODE $d (run scripts/publish_code_to_volume.sh first)"; exit 1; }
   log "CODE_OK $d $(git -C "$d" rev-parse HEAD)"
@@ -32,10 +33,14 @@ if [ ! -x /root/venv_ditto/bin/python ]; then
   python3 -m venv --system-site-packages /root/venv_ditto
   /root/venv_ditto/bin/pip install -q -c /root/constraints.txt "numpy==2.0.1" "onnxruntime-gpu==1.20.2" tqdm librosa soundfile filetype cuda-python cython scikit-image colored tifffile einops imageio imageio-ffmpeg mediapipe
 fi
-# Wan venv: requirements plus the three packages the README omits
+# Wan venv: requirements without flash_attn, plus the three packages the README omits
+# Pod-local copy of the pinned Wan code, patched for TI2V-5B without flash-attn (the volume copy stays unpatched)
+rm -rf /root/wan2.2 && cp -r "$WAN_DIR" /root/wan2.2
+python3 wan/patch_wan.py /root/wan2.2 | tee -a "$LOG" || { log WAN_PATCH_FAIL; exit 1; }
+grep -v -i '^flash_attn' /root/wan2.2/requirements.txt > /root/wan_req.txt
 if [ ! -x /root/venv_wan/bin/python ]; then
   python3 -m venv --system-site-packages /root/venv_wan
-  /root/venv_wan/bin/pip install -q -c /root/constraints.txt --no-build-isolation -r "$WAN_DIR/requirements.txt" einops regex scipy
+  /root/venv_wan/bin/pip install -q -c /root/constraints.txt -r /root/wan_req.txt einops regex scipy
 fi
 /root/venv_cb/bin/python -c "import chatterbox.tts; print('CB_IMPORT_OK')" 2>&1 | tee -a "$LOG"
 /root/venv_ditto/bin/python -c "import imageio_ffmpeg, onnxruntime; print('DITTO_IMPORT_OK')" 2>&1 | tee -a "$LOG"
