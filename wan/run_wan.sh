@@ -11,7 +11,7 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 /root/venv_wan/bin/python -u generate.py \
   --task ti2v-5B \
   --size 1280*704 \
-  --ckpt_dir /workspace-global/models/wan2.2-ti2v-5b \
+  --ckpt_dir "${CKPT_DIR:-/workspace-global/models/wan2.2-ti2v-5b}" \
   --frame_num "$FRAMES" \
   --sample_steps 50 \
   --offload_model True \
