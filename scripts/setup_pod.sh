@@ -36,10 +36,32 @@ if [ ! -x /root/venv_cap/bin/python ]; then
 fi
 step CAP_WHISPER_LOAD
 timeout 600 /root/venv_cap/bin/python -c "import whisper; whisper.load_model('base', download_root='/workspace-global/models/whisper'); print('WHISPER_OK')" 2>&1 | tee -a "$LOG" || { log WHISPER_FAIL_OR_TIMEOUT; exit 1; }
-# System libraries MediaPipe loads at import (libEGL.so.1 is an apt package, not a pip one)
-step APT
-timeout 900 bash -c 'APT_NET="-o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o Acquire::Retries=3"; apt-get $APT_NET update -qq && apt-get $APT_NET install -y -qq libegl1 libgl1 libgles2 ffmpeg' > /tmp/apt.log 2>&1 || { log APT_FAIL_OR_TIMEOUT; tail -n 5 /tmp/apt.log | tee -a "$LOG"; exit 1; }
-log APT_OK
+# System libraries MediaPipe loads at import (libEGL.so.1 is an apt package, not a pip one) and ffmpeg for Ditto.
+# Preferred: offline .deb set on the global volume (no Ubuntu mirror involved). Fallback: apt, fully logged.
+DEBS=/workspace-global/debs
+apt_ok() { ldconfig -p | grep -q 'libEGL.so.1' && ldconfig -p | grep -q 'libGLESv2.so.2' && command -v ffmpeg >/dev/null 2>&1; }
+step APT_OFFLINE
+if ls "$DEBS"/*.deb >/dev/null 2>&1; then
+  timeout 300 dpkg -i "$DEBS"/*.deb 2>&1 | tail -n 5 | tee -a "$LOG" || true
+  ldconfig
+fi
+if apt_ok; then
+  log APT_OFFLINE_OK
+else
+  log "APT_OFFLINE_MISSING falling back to apt (output timestamped below, connections sampled every 30 s)"
+  step APT
+  ( while sleep 30; do
+      echo "$(date +%T) APT_NET conns=$(ss -tn state established 2>/dev/null | tail -n +2 | awk '{print $4"->"$5}' | tr '\n' ' ') procs=$(ps -eo etime,args | grep -E '[a]pt-get|[/]http' | awk '{print $1,$2,$3}' | tr '\n' ';')" | tee -a "$LOG"
+    done ) &
+  SAMPLER=$!
+  set +e
+  timeout 900 bash -c 'APT_NET="-o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o Acquire::Retries=3"; apt-get $APT_NET update && apt-get $APT_NET install -y libegl1 libgl1 libgles2 ffmpeg' 2>&1 | while IFS= read -r l; do echo "$(date +%T) APT $l" | tee -a "$LOG"; done
+  APT_RC=${PIPESTATUS[0]}
+  set -e
+  kill "$SAMPLER" 2>/dev/null || true
+  [ "$APT_RC" -eq 0 ] || { log "APT_FAIL_OR_TIMEOUT rc=$APT_RC"; exit 1; }
+  log APT_OK
+fi
 # Ditto venv: packages from the 2026-11-16 install list, pinned where the notes pin them
 if [ ! -x /root/venv_ditto/bin/python ]; then
   python3 -m venv --system-site-packages /root/venv_ditto
