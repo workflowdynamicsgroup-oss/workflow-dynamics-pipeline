@@ -1,0 +1,29 @@
+Choosing marketing automation software can feel bigger than it should be. Every platform promises to do everything, and pricing pages rarely show the trade-offs. Before you commit, slow down and check what you actually need from the tool.
+
+Start with the work, not the feature list. Write down the three jobs you need done every week, such as capturing leads, sending follow-up emails, and booking calls. A tool that handles those three cleanly is worth more than one with two hundred features you will never open.
+
+Next, count your contacts honestly. Many plans charge by the number of contacts in your list, and that number grows faster than most people expect. Check the price at your size in six months, not just the price on day one.
+
+Then look at the building blocks. Funnels, email sequences, a calendar, and a pipeline view are the core pieces for most small teams. Ask whether each one is built in or added through a separate paid product, because add-ons can double the monthly bill.
+
+Setup time is the cost people forget. A platform can look cheap on paper and still cost you a full weekend of configuration. Give yourself a test build, a single funnel from ad click to booked call, and time how long it takes to launch it.
+
+Integrations matter just as much. Your payment processor, your calendar, your video host, and your CRM all need to talk to each other. Confirm that the connections you need exist natively or through a supported connector, not through a fragile workaround.
+
+Support and documentation are the next check. When something breaks at night, you need a clear help article or a responsive team. Read recent reviews on independent sites, and look for patterns in the complaints rather than a single angry post.
+
+Commission rates are real, and they can shape which tools get the spotlight. Keep that in mind when you read any comparison, including this one.
+
+For most solopreneurs, the decision comes down to three questions. Can I launch my first offer this month? Will the monthly cost still make sense when I double my list? And can I leave later without losing my data? If the answers are yes, yes, and yes, you have a strong candidate.
+
+Exporting your data is an easy question to skip and a painful one to answer later. Before you pay, find out whether you can download your contacts, your email templates, and your automation logic in a usable format. Some platforms make this simple, and others make it deliberately difficult.
+
+Once you have a shortlist of two or three tools, compare them side by side using the same test. Build the same funnel in each, note the number of clicks, record the monthly cost at your current size, and write down anything that surprised you during setup.
+
+The results of a side-by-side test are often more useful than any review, including this one. You will notice which interface makes sense to you, which feature is missing, and which pricing tier you actually need. That evidence should drive your final choice.
+
+Finally, decide and then commit for a real period. Switching platforms every few months wastes money and erases the data and history you have built. Give your choice ninety days of honest use before you judge it, then review the numbers.
+
+If you take only one idea from this video, let it be this. The best tool is the one you will actually finish setting up. Pick the platform that gets your first offer live fastest, then improve it as your business grows.
+
+In the next part, we will walk through a real build, step by step, and show where the setup time actually goes. Thanks for watching.
