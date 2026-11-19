@@ -1,0 +1,21 @@
+Welcome back. In this video I am going to walk you through how a finished video package becomes a real video, from the written script all the way to the final render, and I will show you where each piece fits.
+
+First, the script. Everything starts with words on a page. Each line of the script describes what you hear and what you see at that moment, so the narration and the pictures stay lined up from the very first second.
+
+Next comes the voice. The narration is generated from the script in short pieces, using a recording of my own voice as the reference, so the finished audio sounds like me and not like a stock voice reading over the top.
+
+Then the avatar. The audio is fed into the avatar renderer, which moves the face and the mouth to match every word, and gives us a talking head that we can place in a corner of the screen while the visuals play.
+
+After that we add the visuals. Some scenes are stills, some are short clips, some are screen recordings, and some are simple stat cards. Each one is placed on the timeline for exactly as long as the script says.
+
+Captions are added last. The narration is transcribed, every word is timed, and the current word is highlighted as it is spoken, because most people watch with the sound off and still want to follow along.
+
+Every video is rendered twice. One version is wide, for the main channel, and one is tall, for short clips. They are built separately, so the avatar and the captions always sit where they belong in each format.
+
+Along the way, every step is checked. If a file is missing, or a tool fails, the run stops right away and tells us exactly what went wrong, instead of wasting time and money on a video that was never going to finish.
+
+That is the whole pipeline in a couple of minutes. If you want to see it applied to a real comparison, stay tuned for the next video, and thank you for watching.
+
+Cost matters too. Each run on a rented graphics card is billed by the minute, so the pipeline always deletes the machine when the job ends, whether it worked or failed, and it saves a full log so nothing is ever lost.
+
+If you ever want to change a line, you only change the script and run it again. The voice, the avatar and the captions all follow, and you never have to rebuild a single thing by hand.
