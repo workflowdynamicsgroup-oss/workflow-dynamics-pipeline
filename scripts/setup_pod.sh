@@ -35,7 +35,7 @@ if [ ! -x /root/venv_cap/bin/python ]; then
   log CAP_PIP_OK
 fi
 step CAP_WHISPER_LOAD
-timeout 600 /root/venv_cap/bin/python -c "from faster_whisper import WhisperModel; WhisperModel('base', device='cpu', compute_type='int8', download_root='/workspace-global/models/whisper'); print('FW_WHISPER_OK')" 2>&1 | tee -a "$LOG" || { log WHISPER_FAIL_OR_TIMEOUT; exit 1; }
+timeout 600 /root/venv_cap/bin/python -c "from faster_whisper import WhisperModel; WhisperModel('base', device='cpu', compute_type='int8', download_root='/root/models/whisper'); print('FW_WHISPER_OK')" 2>&1 | tee -a "$LOG" || { log WHISPER_FAIL_OR_TIMEOUT; exit 1; }
 # System libraries MediaPipe loads at import (libEGL.so.1 is an apt package, not a pip one) and ffmpeg for Ditto.
 # Preferred: offline .deb set on the global volume (no Ubuntu mirror involved). Fallback: apt, fully logged.
 DEBS=/workspace-global/debs

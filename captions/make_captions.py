@@ -9,7 +9,7 @@ from faster_whisper import WhisperModel
 
 wav, outdir = sys.argv[1:3]
 os.makedirs(outdir, exist_ok=True)
-ROOT = "/workspace-global/models/whisper" if os.path.isdir("/workspace-global/models/whisper") else None
+ROOT = "/root/models/whisper"  # local disk: the global volume cannot finish HF downloads (chmod refused, model.bin stays incomplete)
 
 def run(device, compute):
     model = WhisperModel("base", device=device, compute_type=compute, download_root=ROOT)
