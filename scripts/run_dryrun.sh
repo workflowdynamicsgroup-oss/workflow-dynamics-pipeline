@@ -2,7 +2,7 @@
 # Dry run: setup, preflight, 10 s Chatterbox narration, 10 s Ditto render. Stops at the first failure.
 # Always: summary + R2 upload, hold HOLD seconds so the live log can be read, then self-delete.
 # Env: RUN_NAME (required), HOLD (default 240), WATCHDOG (default 1500 s), TEXT_FILE (default test/narration10.txt),
-#      AVATAR_SIZE (e.g. 720x540, default: photo as is), DITTO_TIMEOUT (default 900 s), plus pod secrets RUN_POD_API_KEY, R2_*.
+#      PHOTO_SRC (default: volume IMG_3004.png), AVATAR_SIZE (e.g. 720x540, default: photo as is), DITTO_TIMEOUT (default 900 s), plus pod secrets RUN_POD_API_KEY, R2_*.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 : "${RUN_NAME:?set RUN_NAME}"
@@ -14,7 +14,7 @@ bash scripts/self_delete.sh check || { echo "SELF_CHECK_FAIL: aborting before an
 mkdir -p "$OUTDIR"
 stage() { local n=$1 t0 rc=0; shift; t0=$(date +%s); "$@" || rc=$?; echo "STAGE $n rc=$rc seconds=$(( $(date +%s) - t0 ))"; return $rc; }
 prep_photo() { # AVATAR_SIZE=WxH resizes the photo (cover, then crop) so Ditto renders at the real avatar size
-  local src=/workspace-global/inputs/IMG_3004.png
+  local src=${PHOTO_SRC:-/workspace-global/inputs/IMG_3004.png}  # PHOTO_SRC: a path inside the repo (for example inputs/avatar_portrait_S1.png) or on the volume
   echo "PHOTO_SRC $(ffprobe -v error -show_entries stream=width,height -of csv=s=x:p=0 "$src")"
   if [ -n "${AVATAR_SIZE:-}" ]; then
     local w=${AVATAR_SIZE%x*} h=${AVATAR_SIZE#*x}
