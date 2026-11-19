@@ -53,6 +53,8 @@ bash scripts/chunk_copy.sh "$SRC" "$DST" "$WANT" 16 2>>"$LOG" || die "chunk copy
 got=$(stat -c %s "$DST"); log "COPY_DONE bytes=$got seconds=$(( $(date +%s) - t1 ))"; [ "$got" = "$WANT" ] || die "copied size $got != $WANT"
 # --- generate
 t2=$(date +%s)
+# the image sets HF_HUB_ENABLE_HF_TRANSFER=1 but venv_fx has no hf_transfer package (run flux-a1 failed on it): use the built-in downloader
+export HF_HUB_ENABLE_HF_TRANSFER=0
 export FLUX_WEIGHTS="$DST" HF_HOME=/root/hf HF_TOKEN
 /root/venv_fx/bin/python flux/run_flux.py "$PROMPTS" "$OUT" 2>&1 | grep -v -i "it/s\]\|s/it\]" | tee -a "$LOG"
 RC=${PIPESTATUS[0]}
