@@ -6,7 +6,7 @@ import os, sys, pathlib
 run, rc, outs = sys.argv[1], sys.argv[2], sys.argv[3:]
 log = pathlib.Path(os.environ.get("LOG_DIR", f"/workspace-global/logs/{run}")) / "run.log"
 lines = log.read_text(errors="replace").splitlines() if log.exists() else []
-marks = ("CODE_OK", "SETUP_DONE", "PREFLIGHT_OK", "CB_DONE", "DITTO_FILES_OK", "DITTO_DONE", "WAN_DONE", "CAPTIONS_DONE", "CAPTIONS_CHECK", "WATCHDOG", "FAIL", "MISSING", "MISMATCH", "ERROR", "Traceback")
+marks = ("CODE_OK", "SETUP_DONE", "PREFLIGHT_OK", "CB_DONE", "DITTO_FILES_OK", "DITTO_DONE", "WAN_DONE", "CAPTIONS_DONE", "CAPTIONS_CHECK", "BROLL_", "STAGE broll", "WATCHDOG", "FAIL", "MISSING", "MISMATCH", "ERROR", "Traceback")
 print(f"===== SUMMARY run={run} exit={rc} log_lines={len(lines)} =====")
 for l in lines:
     if any(m in l for m in marks): print("  " + l[:200])
