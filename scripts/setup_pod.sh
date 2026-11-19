@@ -31,11 +31,11 @@ fi
 if [ ! -x /root/venv_cap/bin/python ]; then
   python3 -m venv --system-site-packages /root/venv_cap
   step CAP_PIP
-  timeout 900 /root/venv_cap/bin/pip install $PIP_NET openai-whisper 2>&1 | tail -n 3 | tee -a "$LOG"
+  timeout 900 /root/venv_cap/bin/pip install $PIP_NET "faster-whisper==1.2.1" "av==16.1.0" 2>&1 | tail -n 3 | tee -a "$LOG"  # av 19 breaks faster-whisper 1.2.1 (metadata_errors)
   log CAP_PIP_OK
 fi
 step CAP_WHISPER_LOAD
-timeout 600 /root/venv_cap/bin/python -c "import whisper; whisper.load_model('base', download_root='/workspace-global/models/whisper'); print('WHISPER_OK')" 2>&1 | tee -a "$LOG" || { log WHISPER_FAIL_OR_TIMEOUT; exit 1; }
+timeout 600 /root/venv_cap/bin/python -c "from faster_whisper import WhisperModel; WhisperModel('base', device='cpu', compute_type='int8', download_root='/workspace-global/models/whisper'); print('FW_WHISPER_OK')" 2>&1 | tee -a "$LOG" || { log WHISPER_FAIL_OR_TIMEOUT; exit 1; }
 # System libraries MediaPipe loads at import (libEGL.so.1 is an apt package, not a pip one) and ffmpeg for Ditto.
 # Preferred: offline .deb set on the global volume (no Ubuntu mirror involved). Fallback: apt, fully logged.
 DEBS=/workspace-global/debs
