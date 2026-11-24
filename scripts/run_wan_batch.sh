@@ -15,7 +15,7 @@ PROMPTS="${PROMPTS:-wan/prompts_ghl_vs_systeme.tsv}"
 LOG_DIR="${LOG_DIR:-/workspace-global/logs/$RUN_NAME}"; mkdir -p "$LOG_DIR"; export LOG_DIR
 LOG="$LOG_DIR/run.log"
 OUT="${OUT:-/root/wan_out}"; mkdir -p "$OUT"
-WANT_BYTES=34203123497; MODEL_SRC=/workspace-global/models/wan2.2-ti2v-5b; MODEL_DST=/root/models/wan2.2-ti2v-5b
+MODEL_SRC=/workspace-global/models/wan2.2-ti2v-5b; MODEL_DST=/root/models/wan2.2-ti2v-5b
 log() { echo "$(date -u +%T) $*" | tee -a "$LOG"; }
 terminate() { if [ "$DRY_RUN" = 1 ]; then echo "DRY_RUN: would terminate pod"; else bash scripts/self_delete.sh terminate; fi; }
 if [ "$DRY_RUN" != 1 ]; then
@@ -60,6 +60,7 @@ if [ "$DRY_RUN" != 1 ]; then
   step_rc=0; ( set -e; bash scripts/setup_pod.sh; bash preflight/check_imports.sh ) 2>&1 | tee -a "$LOG" | grep -E "PREFLIGHT_OK|SETUP_DONE|FAIL|MISSING" ; step_rc=${PIPESTATUS[0]}
   echo "STAGE setup rc=$step_rc seconds=$(( $(date +%s) - t0 ))" | tee -a "$LOG"; [ "$step_rc" = 0 ] || die "setup or preflight failed"
   t1=$(date +%s); mkdir -p "$MODEL_DST"
+  WANT_BYTES=$(find "$MODEL_SRC" -type f -printf '%s\n' | awk '{s+=$1} END{print s+0}'); [ "$WANT_BYTES" -gt 30000000000 ] || die "model source on volume is only $WANT_BYTES bytes"
   while IFS= read -r -d '' f; do
     rel=${f#"$MODEL_SRC"/}; mkdir -p "$MODEL_DST/$(dirname "$rel")"; sz=$(stat -c %s "$f")
     if [ "$sz" -lt 67108864 ]; then cp "$f" "$MODEL_DST/$rel"; else bash scripts/chunk_copy.sh "$f" "$MODEL_DST/$rel" "$sz" 16 2>>"$LOG" || die "chunk copy failed for $rel"; fi
