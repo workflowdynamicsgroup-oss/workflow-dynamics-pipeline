@@ -17,6 +17,7 @@ RENDITION = os.environ.get("RENDITION", "medium")
 MIN_WIDTH = int(os.environ.get("MIN_WIDTH", "1280"))
 MIN_SECONDS = float(os.environ.get("MIN_SECONDS", "4"))
 SLEEP = float(os.environ.get("RETRY_SLEEP", "5"))
+PER_TERM = int(os.environ.get("PER_TERM", "1"))
 
 def order(first):
     return [first] + [n for n in ("medium", "large", "small", "tiny") if n != first]
@@ -95,7 +96,7 @@ def main():
     os.makedirs(outdir, exist_ok=True)
     manifest, bad, seen = [], 0, set()
     for term in terms:
-        got = None
+        found = 0
         try:
             hits = search(key, term)
         except Exception as e:
@@ -125,12 +126,13 @@ def main():
                    "bytes": os.path.getsize(path), "license": LICENSE, "license_url": LICENSE_URL, "license_notes": LICENSE_NOTES,
                    "needs_visual_review": True,
                    "downloaded": time.strftime("%Y-%m-%d"), **info}
-            break
-        if got:
             manifest.append(got)
             print(f"BROLL_CLIP id={got['id']} {got['width']}x{got['height']} {got['fps']}fps "
                   f"{got['duration_s']}s {got['bytes']//1024}KB author={got['author']} term={term!r}", flush=True)
-        else:
+            found += 1
+            if found >= PER_TERM:
+                break
+        if not found:
             bad += 1
             print(f"BROLL_NO_CLIP term={term!r}", flush=True)
     with open(os.path.join(outdir, "broll_manifest.json"), "w") as f:
