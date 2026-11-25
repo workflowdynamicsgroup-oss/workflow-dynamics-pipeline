@@ -61,7 +61,7 @@ def avatar_segments(fmt):
             s = scenes[sid]
             if sid in ids:
                 if run is None:
-                    run = {"src": f"avatar/avatar-{name}-{fmt}.mov", "startSec": s["start"], "endSec": s["end"], "offsetSec": round(offset, 3)}
+                    run = {"src": f"avatar/avatar-{name}.webm", "startSec": s["start"], "endSec": s["end"], "offsetSec": round(offset, 3)}
                 else:
                     run["endSec"] = s["end"]
                 offset += s["end"] - s["start"]
