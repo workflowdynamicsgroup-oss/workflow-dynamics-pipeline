@@ -29,7 +29,7 @@ export type ShotProps = {
 
 export type CaptionWord = {word: string; startMs: number; endMs: number};
 
-export type AvatarBlock = {src: string; startSec: number; endSec: number};
+export type AvatarBlock = {src: string; startSec: number; endSec: number; offsetSec?: number};
 
 export type VideoProps = {
   format: '16x9' | '9x16';

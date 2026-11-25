@@ -91,7 +91,7 @@ export const Main: React.FC<VideoProps> = (p) => {
         const to = toFrame(b.endSec, fps);
         return (
           <Sequence key={`avatar-${i}`} from={from} durationInFrames={Math.max(1, to - from)}>
-            <Avatar src={b.src} vertical={vertical} />
+            <Avatar src={b.src} vertical={vertical} offsetFrames={toFrame(b.offsetSec ?? 0, fps)} />
           </Sequence>
         );
       })}
