@@ -23,9 +23,7 @@ export const Captions: React.FC<{words: CaptionWord[]; vertical: boolean}> = ({w
     fontFamily: 'Arial Black, Arial, sans-serif',
     fontWeight: 900,
     color: '#fff',
-    textShadow: '0 3px 8px rgba(0,0,0,0.85)',
-    WebkitTextStroke: '3px rgba(11,31,58,0.9)',
-    paintOrder: 'stroke fill',
+    textShadow: '0 0 6px rgba(11,31,58,0.95), 0 2px 4px rgba(11,31,58,0.95), 2px 2px 0 rgba(11,31,58,0.9), -2px -2px 0 rgba(11,31,58,0.9), 2px -2px 0 rgba(11,31,58,0.9), -2px 2px 0 rgba(11,31,58,0.9)',
     textTransform: 'uppercase',
     lineHeight: 1.1,
   };

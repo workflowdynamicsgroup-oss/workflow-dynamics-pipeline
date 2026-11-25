@@ -39,7 +39,7 @@ export const CompareCard: React.FC<{stat: StatProps; vertical: boolean}> = ({sta
           <div style={{flex: 1, fontSize: vertical ? 38 : 40, fontWeight: 700}}>{r.b}</div>
         </div>
       ))}
-      <div style={{position: 'absolute', left: 0, right: 0, bottom: vertical ? 300 : 170, textAlign: 'center', fontSize: 24, opacity: 0.7}}>{stat.source}</div>
+      <div style={{position: 'absolute', left: 0, right: 0, bottom: vertical ? 300 : 240, textAlign: 'center', fontSize: 24, opacity: 0.7}}>{stat.source}</div>
     </AbsoluteFill>
   );
 };

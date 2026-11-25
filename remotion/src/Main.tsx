@@ -139,7 +139,7 @@ const DisclosureLayer: React.FC<{text: string; windows: number[][]; vertical: bo
         position: 'absolute',
         left: 0,
         right: 0,
-        bottom: vertical ? 700 : 140,
+        bottom: vertical ? 700 : 290,
         textAlign: 'center',
         color: '#fff',
         fontFamily: 'Arial, sans-serif',
