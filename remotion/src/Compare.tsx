@@ -28,13 +28,19 @@ export const CompareCard: React.FC<{stat: StatProps; vertical: boolean}> = ({sta
   return (
     <AbsoluteFill style={{backgroundColor: BG, color: INK, fontFamily: 'Arial, sans-serif', padding: vertical ? 60 : 120, justifyContent: 'center'}}>
       <div style={{display: 'flex', flexDirection: vertical ? 'column' : 'row', fontSize: vertical ? 36 : 40, fontWeight: 900, marginBottom: 30}}>
-        {!vertical && <div style={{flex: 1}} />}
+        {!vertical && <div style={{flex: c.kind === 'pain_points' ? 1.5 : 1, paddingRight: c.kind === 'pain_points' ? 24 : 0}} />}
         <div style={{flex: 1, color: BLUE}}>{c.a}</div>
         <div style={{flex: 1}}>{c.b}</div>
       </div>
       {rows.map((r, i) => (
         <div key={i} style={rowStyle(i)}>
-          <div style={{flex: 1, fontSize: vertical ? 30 : 34, opacity: 0.8}}>{r.label}</div>
+          {c.kind === 'pain_points' ? (
+            <div style={{flex: 1.5, fontSize: vertical ? 30 : 34, fontStyle: 'italic', opacity: 0.9, paddingRight: 24}}>{'\u201C' + r.label + '\u201D'}</div>
+          ) : c.kind === 'pros_cons' ? (
+            <div style={{flex: 1, fontSize: vertical ? 30 : 34, fontWeight: 900, color: r.label.toLowerCase().startsWith('con') ? '#D6336C' : BLUE}}>{r.label}</div>
+          ) : (
+            <div style={{flex: 1, fontSize: vertical ? 30 : 34, opacity: 0.8}}>{r.label}</div>
+          )}
           <div style={{flex: 1, fontSize: vertical ? 38 : 40, fontWeight: 700, color: BLUE}}>{r.a}</div>
           <div style={{flex: 1, fontSize: vertical ? 38 : 40, fontWeight: 700}}>{r.b}</div>
         </div>
