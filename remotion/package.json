@@ -1,0 +1,20 @@
+{
+  "name": "wd-remotion-video",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts Long16x9 out/video-16x9.mp4 --props=props.json --public-dir=pkg"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.544",
+    "remotion": "4.0.544",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "typescript": "5.6.3"
+  }
+}
