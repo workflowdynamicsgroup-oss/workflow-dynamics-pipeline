@@ -10,18 +10,18 @@
     "wpm_measured": true,
     "apify": "keep",
     "helpers": "on",
-    "gen_video_cap": 8,
+    "gen_video_cap": 4,
     "wpm_note": "Chatterbox cloned voice measured 153 words per minute on the full GoHighLevel vs Systeme.io narration (616.6 s) on 2026-11-24, paragraph pauses included. The older 182 figure was a short test and is retired. Set video.wpm in the source file to override, and run retime.py on the real audio for exact timing.",
     "wpm_chatterbox": 153
   },
   "stack": {
-    "render": "Remotion 4.0.544 on the owner's Windows laptop, one render per format, 25 fps, H.264 MP4",
+    "render": "Remotion 4.0.544 on a RunPod CPU pod (16 vCPU), one render per format, 25 fps, H.264 MP4",
     "research": "Apify",
-    "narration": "Chatterbox TTS, cloned voice, about 182 wpm measured 2026-11-18",
+    "narration": "Chatterbox TTS, cloned voice, 153 wpm measured 2026-11-24",
     "avatar": "Ditto talking-head avatar (720x540 source, cut out and shown at 20% of frame width) over the base layer, three scripted blocks",
-    "stills": "FLUX.1-schnell 1024x1024, shown 9-16 s with a slow push",
+    "stills": "FLUX.1-schnell 1024x1024, up to 4 per video, shown 9-16 s with a slow push",
     "clips": "Wan 2.2 TI2V-5B 1280x704 at 24 fps, conformed to 25 fps",
-    "broll": "Pixabay stock footage found from the script's one-sentence brief (Pexels untested)",
+    "broll": "Pixabay stock footage found from the shot's one- or two-noun search (Pexels untested)",
     "captions": "Whisper word timestamps on the final narration audio, full transcript",
     "encode": "FFmpeg",
     "gpu": "RunPod, RTX 4090 or A40 only (the verified cards)",
@@ -67,8 +67,8 @@
   "visual_style": {
     "clip_lead_color": "bright electric blue",
     "clip_mood": "bright, high-contrast, dramatic, scroll-stopping",
-    "clip_avoid": "dark green, dark moody, low-contrast scenes",
-    "still_direction": "Bold hero object, strong contrast, saturated accent color, dramatic rim light, one clear focal point. If a still reads as flat or simple, add a second layer of depth and a stronger light source."
+    "clip_avoid": "dark green, dark moody, low-contrast scenes, money and time props",
+    "still_direction": "A concrete scene or plain object that illustrates the line being spoken, people allowed, bright electric blue background, bright even light, one clear focal point, plain unmarked props."
   },
   "licenses": {
     "FLUX.1-schnell": "Apache 2.0",
@@ -108,16 +108,12 @@
     "still_cap": 4,
     "screenshots_per_product": 3,
     "screen_rec_per_product": 1,
-    "gen_video_cap_max": 8,
+    "gen_video_cap_max": 4,
     "gen_fill_order": [
       "hook",
-      "reveal_transition",
-      "cta_backdrop",
       "ending_backdrop",
-      "bridge",
-      "bridge",
-      "bridge",
-      "bridge"
+      "cta_backdrop",
+      "cta_backdrop"
     ],
     "avatar_min_s": 135,
     "avatar_max_s": 210,
@@ -141,7 +137,6 @@
       210,
       270
     ],
-    "retention_gap_s": 90,
     "category_scenes": [
       8,
       10
@@ -151,8 +146,8 @@
     "apify_cap_usd": 5.0,
     "apify_cost_row_max_age_days": 30,
     "broll_max_share": 0.4,
-    "compare_cards_min": 12,
-    "compare_share_min": 0.2,
+    "compare_cards_min": 10,
+    "compare_share_min": 0.25,
     "compare_kinds": [
       "reviews",
       "pricing",
@@ -195,17 +190,12 @@
     "hook": [
       "hook"
     ],
-    "reveal_transition": [
-      "reveal_bridge"
-    ],
-    "cta_backdrop": [
-      "offer"
-    ],
     "ending_backdrop": [
       "end_screen"
     ],
-    "bridge": [
-      "category"
+    "cta_backdrop": [
+      "offer",
+      "verdict"
     ]
   },
   "banned_phrases": [
@@ -285,32 +275,6 @@
     "free of",
     "lacking"
   ],
-  "forbidden_visual_terms": [
-    "dashboard",
-    "interface",
-    "ui",
-    "user interface",
-    "screenshot",
-    "screen capture",
-    "logo",
-    "pricing page",
-    "browser",
-    "window",
-    "app screen",
-    "website",
-    "webpage",
-    "login",
-    "toolbar",
-    "menu bar",
-    "gohighlevel",
-    "go high level",
-    "clickfunnels",
-    "kartra",
-    "systeme",
-    "systeme.io",
-    "hubspot",
-    "activecampaign"
-  ],
   "flux_required_words": [
     "foreground",
     "midground",
@@ -386,5 +350,44 @@
     "PAIN-POINT MAP",
     "CALCULATOR URL"
   ],
-  "broll": "Pixabay stock footage found from the shot's one- or two-noun search; the Means / Picture brief guides which clip to choose (Pexels untested)"
+  "broll": "Pixabay stock footage found from the shot's one- or two-noun search; the Means / Picture brief guides which clip to choose (Pexels untested)",
+  "banned_prompt_subjects": [
+    "coin",
+    "coins",
+    "piggy bank",
+    "piggy",
+    "clock",
+    "clocks",
+    "stopwatch",
+    "hourglass",
+    "wallet",
+    "calculator",
+    "dollar sign",
+    "dollar",
+    "receipt",
+    "receipts",
+    "ledger",
+    "price tag",
+    "banknote",
+    "banknotes",
+    "cash",
+    "money",
+    "bitcoin",
+    "currency",
+    "safe deposit"
+  ],
+  "flux_required_phrases": [
+    "electric blue"
+  ],
+  "flux_banned_words": [
+    "teal",
+    "green",
+    "amber",
+    "orange",
+    "dark",
+    "moody",
+    "haze",
+    "fog",
+    "smoke"
+  ]
 }

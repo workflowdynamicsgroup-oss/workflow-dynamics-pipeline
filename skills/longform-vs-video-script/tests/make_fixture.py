@@ -15,11 +15,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 import common as c  # noqa: E402
 
 CFG = c.load_config()
-SUBJ = ["Gold coins stacking into a tall tower on a clean white desk", "A brass key turning slowly in an old lock",
+SUBJ = ["A plain silver laptop seen from behind on a clean desk", "A brass key turning slowly in an old lock",
         "Paper airplanes gliding across a bright blue sky", "Colorful puzzle pieces sliding together on a wooden table",
         "A compass needle spinning and settling on a map", "Blue light streaks racing along a glowing grid",
         "A hand placing a final domino into a long chain", "Calendar pages flipping through the months",
-        "A stopwatch hand sweeping around its face", "Cubes snapping together into a tidy glowing wall",
+        "A plain white signpost with two blank arrows", "Cubes snapping together into a tidy glowing wall",
         "Balance scales settling level with two glowing orbs", "Ripples spreading across still water from one drop",
         "Gears meshing smoothly inside a clear glass case", "A lighthouse beam sweeping across calm evening water",
         "Blank paper slips fluttering into a neat pile", "A magnifying glass drifting over a blank sheet of paper",
@@ -137,8 +137,7 @@ def make(ghl=False):
     ]
     for i, (cat, la, lb, ia, ib) in enumerate(cats):
         add("category", f"{cat} A", la, category=cat, chapter=("Head to head" if i == 0 else None), plan=[ia])
-        bridge = {"tag": "GEN-VIDEO", "role": "bridge", "prompt_id": f"w{5 + min(i, 3)}"}
-        add("category", f"{cat} B", lb, category=cat, plan=[ib] + ([bridge] if cat != "ease" else []))
+        add("category", f"{cat} B", lb, category=cat, plan=[ib])
         if i == 0:
             add("soft_cta", "Soft CTA", "If you already know your situation, both are linked below. If not, keep watching.")
 
@@ -173,7 +172,7 @@ def make(ghl=False):
 
     # --- reveal (avatar block 2)
     add("reveal_bridge", "Reveal bridge", "Now the number that changes everything.", avatar_block=2, chapter="The number that matters",
-        plan=[{"tag": "GEN-VIDEO", "role": "reveal_transition", "prompt_id": "w2"}])
+        plan=[None])
     add("held_reveal", "Reveal 1", "Add the tools each one actually needs to do the job you bought it for. [BEAT] Here are the real totals.", avatar_block=2)
     add("held_reveal", "Reveal totals", "All in: $140 a month versus $354.", avatar_block=2,
         osd=[{"text": "$140/mo all in", "at_s": 0.2, "dur_s": 3}, {"text": "$354/mo all in", "at_s": 3.2, "dur_s": 3}, {"text": "$214 / month", "at_s": 7.0, "dur_s": 3}],
@@ -246,17 +245,17 @@ def make(ghl=False):
 
     # extra stills so B-roll stays under 40% of runtime (the pipeline cap); each says what it shows and why
     STYLES = ["isometric 3D", "macro photoreal object", "paper-cut editorial collage"]
-    TOPIC = {"pricing": ["a price tag on a ledger", "a coin slot beside a price card", "a stack of coins beside a calendar", "a tiered staircase of blocks", "an itemized receipt roll", "a jar of coins with a lid half open", "a wallet beside a pocket calculator"],
-             "category": ["a toolbox with one drawer open", "a set of connected gears", "a dial set between two settings", "a tidy control panel of switches", "a row of puzzle pieces", "a stopwatch beside a checklist"],
+    TOPIC = {"pricing": ["a tiered staircase of blocks", "a plain brass key beside a blank card", "a plain white signpost with two blank arrows", "a plain closed laptop with a blank lid", "a ladder leaning on a wall of blocks", "a set of plain headphones on a desk", "a tidy bundle of plain cables"],
+             "category": ["a toolbox with one drawer open", "a set of connected gears", "a dial set between two settings", "a tidy control panel of switches", "a row of puzzle pieces", "a plain keyboard with blank keys"],
              "switching_cost": ["a moving box beside a tangled cable", "a bridge with a missing plank"],
-             "other": ["a signpost with two arrows", "a balance scale holding two weights", "a compass on a folded map", "a lighthouse over calm water", "a paper boat on a clean desk", "a chess piece beside a clock", "a key resting on an open notebook", "a ladder leaning on a wall of blocks", "a magnifying glass over a checklist", "a gate with two open paths"]}
+             "other": ["a signpost with two arrows", "a balance scale holding two weights", "a compass on a folded map", "a lighthouse over calm water", "a paper boat on a clean desk", "a chess piece beside a plain white cube", "a key resting on an open notebook", "a ladder leaning on a wall of blocks", "a magnifying glass over a checklist", "a gate with two open paths"]}
     WHY = {"pricing": "makes the cost point visible while the plan prices are spoken",
            "category": "gives the feature comparison one concrete picture to hold on to",
            "switching_cost": "shows what changing tools later really costs you",
            "other": "gives the choice between the two tools a simple symbol"}
     extra_prompts = {}
     fixed_stills = sum(1 for sc in scenes for sh in (sc.get("shots") or []) if sh["tag"] == "GEN-STILL")
-    budget = 12
+    budget = 14
     n_extra = 0
 
     def free(sc):
@@ -329,7 +328,7 @@ def make(ghl=False):
             TOPIC["other"] = ["a lantern on a stone path", "a paper plane over a desk", "a spirit level on a plank", "a weathervane in clear sky", "an open door with warm light"]
         obj = TOPIC[grp].pop(0)
         pid = f"x{n_extra + 1}"
-        extra_prompts[pid] = {"text": f"Blurred coins in the foreground, {obj} in the midground on a rule-of-thirds point, a lit teal background, one key light, one rim light, a practical glow, haze particles, 16:9.",
+        extra_prompts[pid] = {"text": f"A blurred plain paper plane in the foreground, {obj} in the midground on a rule-of-thirds point, a bright electric blue background, bright even key light, 16:9.",
                               "ken_burns": ["slow zoom in", "slow pan left to right", "slow zoom out", "slow pan right to left"][n_extra % 4], "style": STYLES[n_extra % 3], "purpose": WHY[grp]}
         tail = []
         over = acc - 14.8
@@ -371,20 +370,15 @@ def make(ghl=False):
     A_ = A
     prompts = {
         "flux": {
-            "f1": {"purpose": "shows the cost-versus-value idea behind the hook", "text": "Blurred gold coins in the foreground, a glowing balance scale on a rule-of-thirds point in the midground, a lit electric blue gradient background, one key light, one rim light, drifting haze particles, saturated contrast.", "ken_burns": "slow zoom in toward the scale", "style": "isometric 3D"},
-            "f2": {"purpose": "puts a picture to the pain of a stalled launch", "text": "Blurred cracked tiles in the foreground, a stalled gear tangled in cables in the midground on a rule-of-thirds point, a bright orange lit background, one key light, one rim light, a practical glow, haze particles.", "ken_burns": "slow pan left to right", "style": "macro photoreal object"},
-            "f3": {"purpose": "stands for the trap of comparing features and not total cost", "text": "Blurred paper-cut arrows in the foreground, a bold magnifying glass over stacked receipts in the midground on a rule-of-thirds point, a lit teal background, one key light, one rim light, a practical glow, haze particles.", "ken_burns": "slow zoom out", "style": "paper-cut editorial collage"},
-            "f4": {"purpose": "puts the sticker price against the full ledger", "text": "Blurred coins in the foreground, a gleaming price tag attached to a ledger in the midground on a rule-of-thirds point, a lit amber background, one key light, one rim light, a practical glow, haze particles.", "ken_burns": "slow pan right to left", "style": "isometric 3D"},
+            "f1": {"purpose": "shows the cost-versus-value idea behind the hook", "text": "A blurred plain white signpost in the foreground, a balance scale on a rule-of-thirds point in the midground, a bright electric blue gradient background, bright even key light, saturated contrast, 16:9.", "ken_burns": "slow zoom in toward the scale", "style": "isometric 3D"},
+            "f2": {"purpose": "puts a picture to the pain of a stalled launch", "text": "Blurred cracked tiles in the foreground, a stalled gear tangled in cables in the midground on a rule-of-thirds point, a bright electric blue background, bright even key light, 16:9.", "ken_burns": "slow pan left to right", "style": "macro photoreal object"},
+            "f3": {"purpose": "stands for the trap of comparing features and not total cost", "text": "Blurred paper-cut arrows in the foreground, a bold magnifying glass over a blank checklist in the midground on a rule-of-thirds point, a bright electric blue background, bright even key light, 16:9.", "ken_burns": "slow zoom out", "style": "paper-cut editorial collage"},
+            "f4": {"purpose": "puts the sticker plan against the full set of tools", "text": "A blurred plain white signpost in the foreground, a plain closed laptop with a blank lid in the midground on a rule-of-thirds point, a bright electric blue background, bright even key light, 16:9.", "ken_burns": "slow pan right to left", "style": "isometric 3D"},
         },
         "wan": {
             "w1": {"text": "Bright electric blue light ribbons sweep across a luminous white space while glowing particles burst outward in rhythmic pulses, with a dramatic camera push forward, saturated cyan highlights, crisp motion and strong contrast."},
-            "w2": {"text": "A brilliant tunnel of electric blue and white light streaks rushes toward the camera, with sparks scattering at the edges, fast smooth motion, saturated colors, high contrast and a sharp bright center."},
             "w3": {"text": "Soft bright blue gradient waves roll slowly across a clean luminous field, leaving generous open space in the lower center, with gentle sparkles drifting upward and calm, polished, high contrast lighting."},
             "w4": {"text": "A glowing electric blue orb sits centered in a bright luminous field, pulsing gently while quiet light trails drift along the far left and right edges, calm motion, polished high contrast glow, steady and centered."},
-            "w5": {"text": "Bright cyan and gold light streaks whip across the frame in a quick abstract sweep, with glowing particles trailing behind, smooth fast motion, saturated high contrast color and a crisp luminous finish."},
-            "w6": {"text": "A bright blue grid of light pulses outward from the center while white sparks ripple across it, quick smooth motion, saturated electric color, high contrast and a clean luminous background."},
-            "w7": {"text": "Electric blue and orange light trails curve through a bright open space, crossing in a rhythmic dance, with sparkling particles in their wake, smooth motion, saturated high contrast color."},
-            "w8": {"text": "A bright wave of white and cyan light rolls across the frame in a clean sweep, throwing glowing particles ahead of it, smooth energetic motion, saturated electric color and strong contrast."},
         },
     }
     for sc in scenes:
@@ -399,13 +393,13 @@ def make(ghl=False):
             "vs_page_url": "https://example.com/vs", "slug": "ghl-vs-beta-fixture" if ghl else "alpha-vs-beta-fixture",
             "primary_keyword": f"{A} vs {B}", "primary_keyword_status": "assumed", "secondary_keywords": ["fixture keyword"],
             "tiers": {"a": {"tier": "hands-on", "tested_components": ["pipelines", "automations"]}, "b": {"tier": "research"}},
-            "disclosure_type": "unsponsored", "avatar": {"mode": "generated"}, "gen_video_cap": 8, "wpm": 182,
+            "disclosure_type": "unsponsored", "avatar": {"mode": "generated"}, "gen_video_cap": 4, "wpm": 182,
             "segments": ["Solo operators", "Agency owners", "Scaling startups"],
             "render_composition": "Long16x9",
             "style_families": ["isometric 3D", "macro photoreal object", "paper-cut editorial collage"],
             "variation": {"category_order": ["setup", "features", "integrations", "ease", "support"], "micro_authority_device": "timed setup",
                           "hook_device": "price contrast", "hook_type": "number-led claim", "opener_device": "slam word",
-                          "visual_motif": "ledger"},
+                          "visual_motif": "signpost"},
             "held_reveal": {"number": "$214", "flips": "the solo operator answer when running more than one funnel", "segment": "Solo operators"},
             "hook_options": {"A": {"line": scenes[0]["line"], "type": "number-led claim"},
                              "B": {"scene_lines": ["Two plans. One bill surprises you.", "Which one is it?"], "type": "pain-first"}},
@@ -431,8 +425,8 @@ def make(ghl=False):
             "CALCULATOR URL": "https://example.com/calculator"},
     }
     # R-BROLL: every B-roll shot carries a Means / Picture brief and a one- or two-noun search
-    nouns = ["gears", "key", "compass", "coins", "toolbox", "domino", "calendar", "stopwatch", "cubes", "scales", "ripples", "lighthouse",
-             "paper", "magnifier", "cables", "ladder", "wallet", "door", "signpost", "hourglass", "bulb", "rocket", "puzzle", "clock",
+    nouns = ["gears", "key", "compass", "laptop", "toolbox", "domino", "calendar", "headphones", "cubes", "scales", "ripples", "lighthouse",
+             "paper", "magnifier", "cables", "ladder", "keyboard", "door", "signpost", "umbrella", "bulb", "rocket", "puzzle", "notebook",
              "map", "lock", "anchor", "bridge", "kite", "lantern", "feather", "bell", "telescope", "mirror", "ribbon", "bucket"]
     k = 0
     for sc in source["scenes"]:

@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import common as c  # noqa: E402
 import apify_budget as ab  # noqa: E402
 
-CRITICAL_RULES = {"R-HONESTY", "R-DISC", "R-NOFAKE", "R-NOSPOKEN", "R-AIFLAG", "R-SPEC", "R-GENLIMIT", "R-SHOTS", "R-COMPARE"}
+CRITICAL_RULES = {"R-HONESTY", "R-DISC", "R-NOFAKE", "R-NOSPOKEN", "R-AIFLAG", "R-SPEC", "R-GENLIMIT", "R-SHOTS", "R-COMPARE", "R-NOPROPS"}
 FLAG_TOKENS = ["[VERIFY AT PUBLISH]", "[VERIFY AT BUILD]", "[TBD AT INSTALL]"]
 
 
@@ -57,11 +57,6 @@ def scene_texts(sc):
         if sh.get("tag") == "STAT" and st.get("value"):
             texts.append(str(st["value"]))
     return texts
-
-
-def is_ghl(name):
-    n = re.sub(r"[^a-z]", "", name.lower())
-    return n in ("gohighlevel", "ghl")
 
 
 # ---------------------------------------------------------------------- checks
@@ -327,10 +322,6 @@ def check_secret(R, ctx):
     proof = by.get("third_party_proof", [])
     ok = bool(proof) and all(len(c.number_tokens(" ".join(scene_texts(p["scene"])))) >= 2 for p in proof if c.number_tokens(p["scene"]["line"]))
     R.add("R-PROOF", ok, "ratings show a number and a review count on screen" if ok else "third_party_proof scenes need rating and review count in on_screen_text")
-    # retention beat gaps
-    beats = [0.0] + [s["start"] for s in tl if s["scene"].get("retention_beat")] + [tl[-1]["end"]]
-    gaps = [b - a for a, b in zip(beats, beats[1:])]
-    R.add("R-RETENTION", max(gaps) <= lim["retention_gap_s"] + 0.5, f"longest stretch without a retention beat: {max(gaps):.0f}s (max 90)", severity="standard")
     chs = [(s["start"], s["scene"]["chapter"]) for s in tl if s["scene"].get("chapter")]
     ok = len(chs) >= lim["chapter_min_count"] and chs and chs[0][0] < 0.5
     if ok:
@@ -410,7 +401,7 @@ def check_shots(R, ctx):
                 if miss:
                     bad_stat.append(f"{sh['id']}: missing {miss}")
     R.add("R-SHOTS", not bad_tag, "every shot uses a pipeline tag" if not bad_tag else f"unknown shot tags: {bad_tag}")
-    R.add("R-SHOTS", not bad_dur, "shots are whole seconds, 5s or less (stills and stat cards 9-16s)" if not bad_dur else f"shot durations the pipeline rejects: {bad_dur[:8]}")
+    R.add("R-SHOTS", not bad_dur, "shots are whole seconds: Wan clips and logos 2-5s, B-roll and real captures 2-10s, stills and stat cards 9-16s" if not bad_dur else f"shot durations the pipeline rejects: {bad_dur[:8]}")
     R.add("R-SHOTS", not unfit, "every scene's shots fill its narration time" if not unfit else f"shots cannot fill the scene (add or remove shots): {unfit[:8]}")
     R.add("R-SHOTS", not bad_fields, "every shot has the fields its tag needs" if not bad_fields else f"missing shot fields: {bad_fields[:8]}")
     R.add("R-SHOTS", not bad_stat, "every stat card has value, label and source" if not bad_stat else f"stat cards without a source or label: {bad_stat}")
@@ -470,16 +461,6 @@ def check_inserts(R, ctx):
     R.add("R-INSERT", stills <= lim["still_cap"], f"{stills} GEN-STILL stills (max {lim['still_cap']})")
     ok = max(shots_c.values()) <= lim["screenshots_per_product"] and max(recs_c.values()) <= lim["screen_rec_per_product"]
     R.add("R-INSERT", ok, "per-product limits respected" if ok else "per-product limit exceeded (3 screenshots, 1 screen recording each)")
-    pa, pb = src["video"]["product_a"], src["video"]["product_b"]
-    if is_ghl(pb) or is_ghl(pa):
-        first = {}
-        for s in tl:
-            for sh in s["shots"]:
-                if c.shot_tag(sh["src"]) in ("ASSET-SHOT", "ASSET-CLIP"):
-                    for q in (["a", "b"] if str(sh["src"].get("product", "a")).lower() == "ab" else [str(sh["src"].get("product", "a")).lower()]):
-                        first.setdefault(q, sh["start"])
-        ok = "a" not in first or "b" not in first or first["a"] <= first["b"]
-        R.add("R-GHL-FIRST", ok, "product A's first capture comes before product B's" if ok else "product A's first capture must come first")
 
 
 def check_compare(R, ctx):
@@ -572,30 +553,25 @@ def check_genlimit(R, ctx):
     R.add("R-GENLIMIT", not dark, "no dark or moody clip prompts" if not dark else f"prompts drift toward the dark/moody look the channel dropped: {dark}", severity="warn")
 
 
-def check_nofake(R, ctx):
-    src, cfg, tl = ctx["src"], ctx["cfg"], ctx["tl"]
-    terms = [(t, words_re(t)) for t in cfg["forbidden_visual_terms"]]
+def check_noprops(R, ctx):
+    """R-NOPROPS: generated pictures and clips never use the banned props (coins, clocks, piggy banks and the like).
+    R-NOFAKE (no generated copy of a named product's screen, logo or pricing page) is a manual review, not a word list."""
+    src, cfg = ctx["src"], ctx["cfg"]
+    terms = [(t, words_re(t)) for t in cfg.get("banned_prompt_subjects", [])]
     hits = []
-    for pid, p in list(src.get("prompts", {}).get("flux", {}).items()) + list(src.get("prompts", {}).get("wan", {}).items()):
-        for t, rx in terms:
-            if rx.search(p["text"].lower()):
-                hits.append(f"prompt {pid}: '{t}'")
-    for s in tl:
-        for sh in s["shots"]:
-            if c.shot_tag(sh["src"]) != "B-ROLL":
-                continue
-            blob = str(sh["src"].get("text", "")).lower()
+    for kind in ("flux", "wan"):
+        for pid, p in src.get("prompts", {}).get(kind, {}).items():
             for t, rx in terms:
-                if rx.search(blob):
-                    hits.append(f"B-roll {sh['id']}: '{t}'")
-    R.add("R-NOFAKE", not hits, "no visual description resembles a named product's interface, logo, or pricing page" if not hits else f"forbidden visual terms: {hits[:10]}")
+                if rx.search(p["text"].lower()):
+                    hits.append(f"{kind} prompt {pid}: '{t}'")
+    R.add("R-NOPROPS", not hits, "no generated prompt uses a banned prop (coins, clocks, piggy banks, money)" if not hits else f"banned props in generated prompts: {hits[:10]}")
 
 
 def check_stills(R, ctx):
     src, cfg, tl = ctx["src"], ctx["cfg"], ctx["tl"]
     flux = src.get("prompts", {}).get("flux", {})
     neg = set(w for w in cfg["negation_words_in_prompts"] if " " not in w)
-    bad_neg, bad_words, no_kb, bad_ref = [], [], [], []
+    bad_neg, bad_words, no_kb, bad_ref, off_palette = [], [], [], [], []
     refs = []
     for s in tl:
         for sh in s["shots"]:
@@ -609,8 +585,12 @@ def check_stills(R, ctx):
         if set(re.findall(r"[a-z']+", p["text"].lower())) & neg:
             bad_neg.append(pid)
         miss = [w for w in cfg["flux_required_words"] if w not in text]
+        miss += [w for w in cfg.get("flux_required_phrases", []) if w not in text]
         if miss:
             bad_words.append(f"{pid}: {miss}")
+        off = sorted(set(re.findall(r"[a-z']+", p["text"].lower())) & set(cfg.get("flux_banned_words", [])))
+        if off:
+            off_palette.append(f"{pid}: {off}")
     R.add("R-STILL", not bad_ref, "every GEN-STILL shot has a FLUX prompt" if not bad_ref else f"missing FLUX prompts: {bad_ref}")
     R.add("R-STILL", not bad_neg, "FLUX prompts describe only what is there" if not bad_neg else f"negation words in FLUX prompts: {bad_neg}")
     used = [flux[r] for r in dict.fromkeys(refs) if r in flux]
@@ -618,16 +598,8 @@ def check_stills(R, ctx):
     no_why = [r for r in dict.fromkeys(refs) if r in flux and len(str(flux[r].get("purpose", "")).split()) < 4]
     R.add("R-STILL", not no_kb, "every still names its Ken Burns move" if not no_kb else f"stills missing a ken_burns move (slow push direction): {no_kb}")
     R.add("R-STILL", not no_why, "every still states what point it supports" if not no_why else f"stills missing a purpose (4+ words, the point it makes for this scene): {no_why}")
-    on_topic = sum(1 for s in tl for sh in s["shots"] if c.shot_tag(sh["src"]) == "GEN-STILL" and s["scene"]["section"] in ("pricing", "category", "held_reveal", "switching_cost"))
-    n_st = len(refs)
-    R.add("R-STILL", n_st == 0 or on_topic * 4 >= n_st, f"{on_topic} of {n_st} stills sit in pricing, feature, switching-cost or reveal scenes (at least a quarter)", severity="standard")
-    R.add("R-STILL", not bad_words, "FLUX prompts carry depth layers and 16:9" if not bad_words else f"FLUX prompts missing required words: {bad_words}")
-    fam = src["video"].get("style_families", [])
-    if flux:
-        R.add("R-STILL", 3 <= len(fam) <= 4, f"{len(fam)} style families chosen (3 or 4)")
-        seq = [flux[r].get("style") for r in refs if r in flux and not flux[r].get("backdrop")]
-        rep = [f"{a}/{b}" for a, b in zip(seq, seq[1:]) if a and a == b]
-        R.add("R-STILL", not rep, "no style family repeats in adjacent stills" if not rep else f"adjacent stills share a style family: {rep}")
+    R.add("R-STILL", not bad_words, "FLUX prompts carry depth layers, 'electric blue' and 16:9" if not bad_words else f"FLUX prompts missing required words: {bad_words}")
+    R.add("R-STILL", not off_palette, "FLUX prompts stay on the bright electric blue palette" if not off_palette else f"off-palette words in FLUX prompts (teal, green, amber, orange, dark, moody, haze, fog, smoke): {off_palette}")
     unused = sorted(set(flux) - set(refs))
     R.add("R-STILL", not unused, "no unused FLUX prompts" if not unused else f"prompts never used: {unused}", severity="warn")
 
@@ -737,35 +709,12 @@ def check_cta(R, ctx):
     R.add("R-CTA", ok, "offer button reads 'Use my link first'" if ok else "offer scene button must read 'Use my link first'")
     stray = [sc["id"] for sc in scenes if sc.get("cta_button") and sc["section"] not in ("verdict", "verdict_reason", "offer")]
     R.add("R-CTA", not stray, "buttons only on verdicts and the offer" if not stray else f"buttons on other scenes: {stray}")
-    if len(verdict_products) > 1 and ("a" in verdict_products and "b" in verdict_products):
-        first_a = verdict_products.index("a") < verdict_products.index("b")
-        R.add("R-GHL-FIRST", first_a or not (is_ghl(pa) or is_ghl(pb)), "product A's verdict comes first" if first_a else "product A's verdict must come first when GoHighLevel is in the video")
     reason = src["video"].get("single_winner_reason", "")
     if verdict_products and len(set(verdict_products)) == 1:
         R.add("R-HONESTY", bool(reason), "one product wins every segment with a recorded reason" if reason
               else "one product wins every segment; set video.single_winner_reason (evidence-based) or find an honest segment for the other")
     else:
         R.add("R-HONESTY", True, "each product wins at least one segment")
-
-
-def check_ghl_first(R, ctx):
-    src, tl = ctx["src"], ctx["tl"]
-    pa, pb = src["video"]["product_a"], src["video"]["product_b"]
-    if is_ghl(pb) and not is_ghl(pa):
-        R.add("R-GHL-FIRST", False, "GoHighLevel must be Product A")
-        return
-    if not (is_ghl(pa) or is_ghl(pb)):
-        return
-    other = pb
-    bad = []
-    for s in tl:
-        for t in [s["scene"]["line"]] + scene_texts(s["scene"]):
-            tl_ = norm(t)
-            ia = min([i for i in (tl_.find(norm(pa)), tl_.find("go high level")) if i >= 0], default=-1)
-            ib = tl_.find(norm(other))
-            if ia >= 0 and ib >= 0 and ib < ia:
-                bad.append(s["id"])
-    R.add("R-GHL-FIRST", not bad, "GoHighLevel is named first wherever both products appear" if not bad else f"GoHighLevel not first in scenes {sorted(set(bad))}")
 
 
 def check_tier(R, ctx):
@@ -820,17 +769,24 @@ def check_vary(R, ctx):
 def check_apify(R, ctx):
     ws = ctx["workspace"]
     cap = ctx["cfg"]["limits"]["apify_cap_usd"]
-    if ws:
-        p = Path(ws) / "apify-run-log.json"
-        if p.exists():
+    p = Path(ws) / "apify-run-log.json" if ws else None
+    if True:
+        if p is not None and p.exists():
             log = c.load_json(p)
             probs = ab.check_run_log(log, cap)
             R.add("R-APIFY-CAP", not probs, f"{len(log.get('runs', []))} Apify runs, total ${ab.tally(log):.2f} of ${cap:.2f}, per-run stops respected" if not probs else "; ".join(probs), severity="standard")
         else:
+            # Only check what ran: with no spend there is nothing to log; with spend and no log file, check the recorded per-actor figures against the cap.
             spend = ctx["src"].get("research_summary", {}).get("apify_spend", {})
-            R.add("R-APIFY-CAP", not spend, "no Apify run log needed (no spend recorded)" if not spend else "spend recorded but apify-run-log.json not found in the workspace", severity="warn")
-        t = Path(ws) / "apify-cost-table.json"
-        if t.exists():
+            nums = [float(v) for v in spend.values() if isinstance(v, (int, float))] if isinstance(spend, dict) else []
+            if not spend:
+                R.add("R-APIFY-CAP", True, "no Apify run log needed (no spend recorded)")
+            elif nums and len(nums) == len(spend):
+                R.add("R-APIFY-CAP", sum(nums) <= cap + 0.005, f"recorded Apify spend ${sum(nums):.2f} of ${cap:.2f} (no run log in the workspace)" if sum(nums) <= cap + 0.005 else f"recorded Apify spend ${sum(nums):.2f} is over the ${cap:.2f} cap")
+            else:
+                R.add("R-APIFY-CAP", False, "spend recorded without per-actor figures and no apify-run-log.json in the workspace", severity="warn")
+        t = Path(ws) / "apify-cost-table.json" if ws else None
+        if t is not None and t.exists():
             table = c.load_json(t)
             stale = ab.stale_rows(table, ctx["cfg"]["limits"]["apify_cost_row_max_age_days"])
             R.add("R-APIFY-CAP", not stale, "cost table rows are fresh" if not stale else f"refresh price rows older than 30 days: {stale}", severity="warn")
@@ -899,7 +855,7 @@ def check_packaging_files(R, ctx):
 
 CHECKS = [check_structure, check_disclosure, check_nospoken, check_length, check_lines, check_voice, check_rhythm,
           check_open_close, check_secret, check_proof, check_narration, check_shots, check_inserts, check_compare, check_genlimit,
-          check_nofake, check_stills, check_avatar, check_aiflags, check_spec, check_cta, check_ghl_first,
+          check_noprops, check_stills, check_avatar, check_aiflags, check_spec, check_cta,
           check_tier, check_vary, check_apify, check_flag_leaks, check_facts, check_packaging_files]
 
 

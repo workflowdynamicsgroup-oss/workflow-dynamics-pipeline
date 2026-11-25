@@ -25,7 +25,7 @@ for i, line in enumerate(lines):
         errors.append(f"{sid}: unknown tag [{tag}]"); continue
     kind = KIND[tag]
     dur = end - start
-    cap = 8 if kind == "broll" else 5  # B-roll clips run 2-8 s; every other non-still shot stays 5 s or less
+    cap = 10 if kind in ("broll", "screen", "clip") else 5  # B-roll and real captures run 2-10 s; Wan clips and logos stay 5 s or less
     if kind not in ("still", "stat") and dur > cap:
         errors.append(f"{sid}: {dur}s {kind} shot is over {cap}.0 s")
     if kind in ("still", "stat") and not (9 <= dur <= 16):
