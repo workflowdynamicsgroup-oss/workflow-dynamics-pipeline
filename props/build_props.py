@@ -46,7 +46,8 @@ def src_for(shot):
     if k == "stat":   return ""
     if k == "wan":    return f"clips/{sid}.mp4"
     if k == "broll":  return f"broll/{sid}.mp4"
-    return f"assets/{sid}.mp4"  # screen, clip
+    if k == "screen": return f"assets/{sid}.png"  # real page captures are screenshots
+    return f"assets/{sid}.mp4"  # clip
 
 def avatar_segments(fmt):
     if "timing" not in opts or "blocks" not in opts:
