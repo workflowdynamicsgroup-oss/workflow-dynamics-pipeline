@@ -4,7 +4,7 @@
 # Order: self-check, setup, preflight, then block1 and block2 (voice, photo prep, Ditto), summary, R2 upload, hold, self-delete.
 # The cutout is NOT run here: run scripts/run_cutout.sh afterwards on the uploaded Ditto blocks (INPUT or INPUT_RUN).
 # Env: RUN_NAME (required), BLOCKS_DIR (default avatar/blocks_ghl_vs_systeme; holds block1.txt and block2.txt),
-#      AVATAR_SIZE (default 720x540), PHOTO_SRC (default volume IMG_3004.png), DITTO_TIMEOUT (default 900 s per block),
+#      BLOCKS (default "block1 block2"; one name re-runs just that block), AVATAR_SIZE (default 720x540), PHOTO_SRC (default volume IMG_3004.png), DITTO_TIMEOUT (default 900 s per block),
 #      WATCHDOG (default 4500 s), HOLD (default 240 s), secrets RUN_POD_API_KEY, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ENDPOINT.
 set -uo pipefail
 cd "$(dirname "$0")/.."
@@ -20,7 +20,8 @@ stage() { local n=$1 t0 rc=0; shift; t0=$(date +%s); "$@" || rc=$?; echo "STAGE 
 bash scripts/self_delete.sh check || { echo "SELF_CHECK_FAIL: aborting before any spend"; exit 1; }
 git config --global --add safe.directory "*" 2>/dev/null || true
 log "BOOT run=$RUN_NAME pipeline_commit=$(git rev-parse --short HEAD 2>/dev/null || echo no-git) blocks=$BLOCKS_DIR size=$AVATAR_SIZE"
-for b in block1 block2; do [ -s "$BLOCKS_DIR/$b.txt" ] || { log "FAIL missing $BLOCKS_DIR/$b.txt"; exit 1; }; done
+BLOCKS="${BLOCKS:-block1 block2}"
+for b in $BLOCKS; do [ -s "$BLOCKS_DIR/$b.txt" ] || { log "FAIL missing $BLOCKS_DIR/$b.txt"; exit 1; }; done
 prep_photo() { # scale and crop the photo to AVATAR_SIZE so Ditto renders at the real avatar size
   local src=${PHOTO_SRC:-/workspace-global/inputs/IMG_3004.png}
   echo "PHOTO_SRC $(ffprobe -v error -show_entries stream=width,height -of csv=s=x:p=0 "$src")"
@@ -43,13 +44,13 @@ RC=0
   stage setup bash scripts/setup_pod.sh
   stage preflight bash preflight/check_imports.sh
   stage photo prep_photo
-  block block1
-  block block2
+  for b in $BLOCKS; do block "$b"; done
 ) || RC=$?
 /root/venv_cap/bin/pip install -q boto3 >/dev/null 2>&1 || python3 -m pip install -q --break-system-packages boto3 >/dev/null 2>&1
 PY=/root/venv_cap/bin/python; [ -x "$PY" ] || PY=python3
 echo "DURATION_CHECK done rc=$RC"
-FIN=$($PY scripts/finish.py "$RUN_NAME" "$RC" "$OUT"/block1.mp4 "$OUT"/block2.mp4 "$OUT"/block1.wav "$OUT"/block2.wav 2>&1); echo "$FIN"
+FILES=(); for b in $BLOCKS; do FILES+=("$OUT/$b.mp4" "$OUT/$b.wav"); done
+FIN=$($PY scripts/finish.py "$RUN_NAME" "$RC" "${FILES[@]}" 2>&1); echo "$FIN"
 if ! echo "$FIN" | grep -q '^UPLOAD_OK'; then
   mkdir -p "/workspace-global/outputs/$RUN_NAME" && cp "$OUT"/* "/workspace-global/outputs/$RUN_NAME/" 2>/dev/null
   echo "UPLOAD_FALLBACK kept in /workspace-global/outputs/$RUN_NAME"
