@@ -1,0 +1,10 @@
+{
+  "rows": [
+    {"purpose": "keyword and autocomplete", "actor": "", "unit_price_usd": null, "unit": "", "limits": {}, "units": 0, "date_read": null},
+    {"purpose": "competitor video list and ratios", "actor": "", "unit_price_usd": null, "unit": "", "limits": {}, "units": 0, "date_read": null},
+    {"purpose": "comments for top and flop videos", "actor": "", "unit_price_usd": null, "unit": "", "limits": {}, "units": 0, "date_read": null},
+    {"purpose": "transcripts", "actor": "", "unit_price_usd": null, "unit": "", "limits": {}, "units": 0, "date_read": null}
+  ],
+  "worst_case_usd": null,
+  "worst_case_checked": null
+}
