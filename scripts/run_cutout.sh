@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Pod wrapper: remove the backdrop from a finished Ditto avatar video on the GPU (u2net_human_seg via onnxruntime-gpu).
-# Env: RUN_NAME (required), INPUT (default /workspace-global/outputs/block135-a10/ditto.mp4; if missing it is fetched from R2 key outputs/<run>/ditto.mp4
-# of the run named in INPUT_RUN, default block135-a10), WATCHDOG (default 900 s), HOLD (default 120 s),
+# Env: RUN_NAME (required), INPUT (a file path), or INPUT_RUN (fetch R2 outputs/<INPUT_RUN>/ditto.mp4; wins over the volume default), else the old test file block135-a10, WATCHDOG (default 900 s), HOLD (default 120 s),
 # secrets RUN_POD_API_KEY, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ENDPOINT.
 # Outputs (uploaded to R2 outputs/<run>/): alpha.mp4 (gray mask, same frames as the input), cutout.webm (VP9 with alpha, audio kept), preview_charcoal.mp4 (first 12 s over #2A2D34).
 set -uo pipefail
@@ -27,7 +26,8 @@ python3 -c "import boto3; print('BOTO3_OK', boto3.__version__)" 2>&1 | tee -a "$
 # --- preflight, before any install
 for t in ffmpeg ffprobe; do command -v $t >/dev/null || die "MISSING $t"; done
 ffmpeg -hide_banner -encoders 2>/dev/null | grep -q libvpx-vp9 && log "VP9_ENCODER_OK" || log "VP9_ENCODER_MISSING (cutout.webm will be skipped)"
-IN="${INPUT:-/workspace-global/outputs/block135-a10/ditto.mp4}"
+# INPUT_RUN set (and INPUT not set): always fetch that run from R2, never the volume default (cutout-ghl-a1-block1 and cutout-ghl-a2-block2 cut the old test video by mistake)
+if [ -n "${INPUT:-}" ]; then IN="$INPUT"; elif [ -n "${INPUT_RUN:-}" ]; then IN=/root/in.mp4; rm -f "$IN"; else IN=/workspace-global/outputs/block135-a10/ditto.mp4; fi
 if [ ! -s "$IN" ]; then
   KEY="outputs/${INPUT_RUN:-block135-a10}/ditto.mp4"; IN=/root/in.mp4; log "INPUT_NOT_ON_VOLUME fetching R2 $KEY"
   python3 - "$KEY" "$IN" <<'PY' 2>&1 | tee -a "$LOG"
