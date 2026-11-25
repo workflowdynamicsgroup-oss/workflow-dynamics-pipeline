@@ -33,12 +33,20 @@ if [ "$SIM" != 1 ]; then
 fi
 # --- preflight: node, ffmpeg, git, then the browser libraries (a missing one is installed, with a timeout)
 t0=$(date +%s)
-if ! command -v node >/dev/null; then
+if [ "${FORCE_WHEEL:-0}" = 1 ] || ! command -v node >/dev/null; then
   python3 -m pip install -q --break-system-packages nodejs-wheel-binaries >/dev/null 2>&1
-  export PATH="$(python3 -c 'import nodejs_wheel,os;print(os.path.join(os.path.dirname(nodejs_wheel.__file__),"bin"))' 2>/dev/null):$PATH"
+  NW="$(python3 -c 'import nodejs_wheel,os;print(os.path.dirname(nodejs_wheel.__file__))' 2>/dev/null)"
+  # the wheel's own npm and npx launchers are broken (missing ../lib/cli.js): call the CLIs directly
+  if [ -x "$NW/bin/node" ]; then
+    ln -sf "$NW/bin/node" /usr/local/bin/node
+    printf '#!/bin/sh\nexec /usr/local/bin/node "%s/lib/node_modules/npm/bin/npm-cli.js" "$@"\n' "$NW" > /usr/local/bin/npm
+    printf '#!/bin/sh\nexec /usr/local/bin/node "%s/lib/node_modules/npm/bin/npx-cli.js" "$@"\n' "$NW" > /usr/local/bin/npx
+    chmod +x /usr/local/bin/npm /usr/local/bin/npx; hash -r
+  fi
 fi
 command -v node >/dev/null && command -v npm >/dev/null || die "MISSING node/npm"
-log "NODE_OK $(node -v) npm $(npm -v)"
+NPMV=$(npm -v 2>&1 | head -1); case "$NPMV" in [0-9]*) ;; *) die "npm not working: $NPMV";; esac
+log "NODE_OK $(node -v) npm $NPMV"
 # --- fetch the package (props, narration, avatars, manifest and every clip) from R2
 if [ "$SIM" = 1 ]; then
   SIM_SRC="${SIM_SRC:?}" python3 render/fetch_package.py "$SIM_SRC/$PKG_PREFIX/manifest.json" "$PKG" 2>&1 | tee -a "$LOG"
@@ -64,7 +72,7 @@ log "FETCH_DONE seconds=$(( $(date +%s) - t0 ))"
 # --- install and browser
 t1=$(date +%s)
 cd remotion
-timeout 900 npm install --no-audit --no-fund --loglevel=error 2>&1 | tail -n 3 | tee -a "$LOG"
+timeout 900 npm install --no-audit --no-fund --loglevel=error 2>&1 | tail -n 15 | tee -a "$LOG"
 [ "${PIPESTATUS[0]}" = 0 ] || { cd ..; die "npm install failed"; }
 # no system ffmpeg on the RunPod image: use the ffmpeg and ffprobe that Remotion ships
 if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
