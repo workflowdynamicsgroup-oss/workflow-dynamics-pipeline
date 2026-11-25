@@ -47,7 +47,7 @@ const Shot: React.FC<{shot: ShotProps; format: string}> = ({shot, format}) => {
       return <Still src={shot.src} />;
     case 'picture':
       return (
-        <AbsoluteFill>
+        <AbsoluteFill style={{backgroundColor: '#F4F7FB', padding: 120}}>
           <Img src={staticFile(shot.src)} style={{width: '100%', height: '100%', objectFit: 'contain'}} />
         </AbsoluteFill>
       );

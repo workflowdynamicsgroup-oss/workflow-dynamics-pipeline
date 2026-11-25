@@ -36,12 +36,9 @@ export const Captions: React.FC<{words: CaptionWord[]; vertical: boolean}> = ({w
   return (
     <div style={style}>
       {group.map((w, i) => (
-        <span
-          key={`${groupStart + i}`}
-          style={{color: groupStart + i === current ? '#1E6BFF' : '#fff', marginRight: 14}}
-        >
-          {w.word}
-        </span>
+        <React.Fragment key={`${groupStart + i}`}>
+          <span style={{color: groupStart + i === current ? '#1E6BFF' : '#fff'}}>{w.word}</span>{' '}
+        </React.Fragment>
       ))}
     </div>
   );
