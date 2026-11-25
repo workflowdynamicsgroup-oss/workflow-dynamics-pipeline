@@ -75,8 +75,9 @@ fi
 ffmpeg -version 2>&1 | head -1 | tee -a "$LOG"
 cd ..
 # shot 62a: both pricing pages side by side, GoHighLevel on the left
-ffmpeg -loglevel error -y -i "$PKG/assets/_gohighlevel-pricing.png" -i "$PKG/assets/_systeme-pricing.png" \
-  -filter_complex "[0:v]scale=-2:540[a];[1:v]scale=-2:540[b];[a][b]hstack=inputs=2,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=0xF4F7FB[o]" -map "[o]" "$PKG/assets/62a.png" || die "62a compose failed"
+python3 -c "import PIL" 2>/dev/null || python3 -m pip install -q --break-system-packages pillow >/dev/null 2>&1
+python3 render/compose_62a.py "$PKG/assets/_gohighlevel-pricing.png" "$PKG/assets/_systeme-pricing.png" "$PKG/assets/62a.png" 2>&1 | tee -a "$LOG"
+[ "${PIPESTATUS[0]}" = 0 ] || die "62a compose failed"
 cd remotion
 if [ "$SIM" != 1 ]; then
   BL=$(ldd node_modules/.remotion/chrome-headless-shell/*/*/chrome-headless-shell 2>/dev/null | grep -c 'not found' || true)
