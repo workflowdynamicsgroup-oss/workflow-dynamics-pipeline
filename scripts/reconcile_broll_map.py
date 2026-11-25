@@ -47,7 +47,7 @@ def main():
             if old.get("clip_seconds") is not None and old["clip_seconds"] < s["duration_s"]:
                 flags.append((sid, f"clip {old['clip_seconds']}s shorter than shot {s['duration_s']}s"))
         else:
-            why = "new shot" if not old else f"noun changed {old.get('search')!r} -> {noun!r}"
+            why = "new shot" if not old else (f"noun changed {old.get('search')!r} -> {noun!r}" if old.get('search') != noun else "no clip chosen yet")
             e = {"shot": sid, "start_s": s["start"], "duration_s": s["duration_s"],
                  "search": noun, "clip_id": None, "clip_file": None, "clip_seconds": None,
                  "page_url": None, "author": None, "license": None,
