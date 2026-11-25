@@ -109,8 +109,11 @@ export const Main: React.FC<VideoProps> = (p) => {
           position: 'absolute',
           right: vertical ? 40 : 30,
           top: vertical ? 1180 : 30,
-          opacity: 0.25,
+          opacity: 0.55,
           color: '#fff',
+          background: 'rgba(11,31,58,0.7)',
+          padding: '4px 12px',
+          borderRadius: 6,
           fontFamily: 'Arial, sans-serif',
           fontSize: vertical ? 26 : 20,
         }}
@@ -141,11 +144,9 @@ const DisclosureLayer: React.FC<{text: string; windows: number[][]; vertical: bo
         color: '#fff',
         fontFamily: 'Arial, sans-serif',
         fontSize: vertical ? 34 : 30,
-        textShadow: '0 2px 6px rgba(0,0,0,0.8)',
-        padding: '0 80px',
       }}
     >
-      {text}
+      <span style={{background: 'rgba(11,31,58,0.75)', padding: '6px 20px', borderRadius: 8, textShadow: 'none'}}>{text}</span>
     </div>
   );
 };

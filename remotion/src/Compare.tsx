@@ -28,6 +28,7 @@ export const CompareCard: React.FC<{stat: StatProps; vertical: boolean}> = ({sta
   return (
     <AbsoluteFill style={{backgroundColor: BG, color: INK, fontFamily: 'Arial, sans-serif', padding: vertical ? 60 : 120, justifyContent: 'center'}}>
       <div style={{display: 'flex', flexDirection: vertical ? 'column' : 'row', fontSize: vertical ? 36 : 40, fontWeight: 900, marginBottom: 30}}>
+        {!vertical && <div style={{flex: 1}} />}
         <div style={{flex: 1, color: BLUE}}>{c.a}</div>
         <div style={{flex: 1}}>{c.b}</div>
       </div>
@@ -38,7 +39,7 @@ export const CompareCard: React.FC<{stat: StatProps; vertical: boolean}> = ({sta
           <div style={{flex: 1, fontSize: vertical ? 38 : 40, fontWeight: 700}}>{r.b}</div>
         </div>
       ))}
-      <div style={{position: 'absolute', left: 0, right: 0, bottom: vertical ? 300 : 60, textAlign: 'center', fontSize: 24, opacity: 0.7}}>{stat.source}</div>
+      <div style={{position: 'absolute', left: 0, right: 0, bottom: vertical ? 300 : 170, textAlign: 'center', fontSize: 24, opacity: 0.7}}>{stat.source}</div>
     </AbsoluteFill>
   );
 };
