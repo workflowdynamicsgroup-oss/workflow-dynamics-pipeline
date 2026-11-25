@@ -33,7 +33,6 @@ if [ "$SIM" != 1 ]; then
 fi
 # --- preflight: node, ffmpeg, git, then the browser libraries (a missing one is installed, with a timeout)
 t0=$(date +%s)
-command -v ffmpeg >/dev/null || die "MISSING ffmpeg"
 if ! command -v node >/dev/null; then
   python3 -m pip install -q --break-system-packages nodejs-wheel-binaries >/dev/null 2>&1
   export PATH="$(python3 -c 'import nodejs_wheel,os;print(os.path.join(os.path.dirname(nodejs_wheel.__file__),"bin"))' 2>/dev/null):$PATH"
@@ -61,15 +60,24 @@ PY
   [ "$FR" = 0 ] && { python3 render/fetch_package.py /root/pkg/manifest.json "$PKG" 2>&1 | tee -a "$LOG"; FR=${PIPESTATUS[0]}; }
 fi
 [ "$FR" = 0 ] || die "package fetch failed"
-# shot 62a: both pricing pages side by side, GoHighLevel on the left
-ffmpeg -loglevel error -y -i "$PKG/assets/_gohighlevel-pricing.png" -i "$PKG/assets/_systeme-pricing.png" \
-  -filter_complex "[0:v]scale=-2:540[a];[1:v]scale=-2:540[b];[a][b]hstack=inputs=2,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=0xF4F7FB[o]" -map "[o]" "$PKG/assets/62a.png" || die "62a compose failed"
 log "FETCH_DONE seconds=$(( $(date +%s) - t0 ))"
 # --- install and browser
 t1=$(date +%s)
 cd remotion
 timeout 900 npm install --no-audit --no-fund --loglevel=error 2>&1 | tail -n 3 | tee -a "$LOG"
 [ "${PIPESTATUS[0]}" = 0 ] || { cd ..; die "npm install failed"; }
+# no system ffmpeg on the RunPod image: use the ffmpeg and ffprobe that Remotion ships
+if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+  RR="$(pwd)"; printf '#!/bin/sh\nexec "%s/node_modules/.bin/remotion" ffmpeg "$@"\n' "$RR" > /usr/local/bin/ffmpeg
+  printf '#!/bin/sh\nexec "%s/node_modules/.bin/remotion" ffprobe "$@"\n' "$RR" > /usr/local/bin/ffprobe
+  chmod +x /usr/local/bin/ffmpeg /usr/local/bin/ffprobe; log "FFMPEG_SHIM remotion ffmpeg"
+fi
+ffmpeg -version 2>&1 | head -1 | tee -a "$LOG"
+cd ..
+# shot 62a: both pricing pages side by side, GoHighLevel on the left
+ffmpeg -loglevel error -y -i "$PKG/assets/_gohighlevel-pricing.png" -i "$PKG/assets/_systeme-pricing.png" \
+  -filter_complex "[0:v]scale=-2:540[a];[1:v]scale=-2:540[b];[a][b]hstack=inputs=2,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=0xF4F7FB[o]" -map "[o]" "$PKG/assets/62a.png" || die "62a compose failed"
+cd remotion
 if [ "$SIM" != 1 ]; then
   BL=$(ldd node_modules/.remotion/chrome-headless-shell/*/*/chrome-headless-shell 2>/dev/null | grep -c 'not found' || true)
   timeout 300 npx remotion browser ensure 2>&1 | tail -n 3 | tee -a "$LOG"
