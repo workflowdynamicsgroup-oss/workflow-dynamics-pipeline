@@ -177,9 +177,10 @@ def sentence_count(line):
 # -------------------------------------------------------------------- timeline
 # Pipeline shot tags (parse_script.py in the video pipeline reads exactly these).
 TAGS = ["GEN-VIDEO", "GEN-STILL", "B-ROLL", "STAT", "ASSET-SHOT", "ASSET-CLIP", "ASSET-BRAND"]
-LONG_TAGS = ("GEN-STILL", "STAT")          # 9-16 s; every other tag is 5 s or less
-SHOT_MIN_S, SHOT_MAX_S = 2, 5
-BROLL_MAX_S = 8                      # B-roll clips run 2-8 s; every other non-still shot stays 2-5 s
+LONG_TAGS = ("GEN-STILL", "STAT")          # 9-16 s
+SHOT_MIN_S, SHOT_MAX_S = 2, 5        # generated Wan clips (about 5 s) and brand logos run 2-5 s
+HOLD_MAX_S = 10                      # B-roll and real captures (screenshots, recordings) run 2-10 s
+HOLD_TAGS = ("B-ROLL", "ASSET-SHOT", "ASSET-CLIP")
 LONG_MIN_S, LONG_MAX_S = 9, 16
 FULLSCREEN_TAGS = ("STAT", "ASSET-SHOT", "ASSET-CLIP", "ASSET-BRAND")   # the avatar is never over these
 
@@ -192,7 +193,7 @@ def shot_bounds(shot):
     tag = shot_tag(shot)
     if tag in LONG_TAGS:
         return (LONG_MIN_S, LONG_MAX_S)
-    return (SHOT_MIN_S, BROLL_MAX_S if tag == "B-ROLL" else SHOT_MAX_S)
+    return (SHOT_MIN_S, HOLD_MAX_S if tag in HOLD_TAGS else SHOT_MAX_S)
 
 
 def gen_video_of(shot):

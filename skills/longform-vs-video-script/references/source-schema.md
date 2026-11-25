@@ -10,7 +10,7 @@ The single source of truth. Write the script once here; every export is generate
 
 | Field | Meaning |
 |---|---|
-| product_a, product_b | Names. When GoHighLevel is in the video it must be A. |
+| product_a, product_b | Names. Product A is the left column on every card and the first product in the script. |
 | link_a, link_b, vs_page_url | Affiliate and VS page links (placeholders allowed, listed in link_placeholders). |
 | slug | Optional. Default `a-vs-b` slugified. |
 | primary_keyword, primary_keyword_status | `validated` or `assumed`. |
@@ -23,7 +23,7 @@ The single source of truth. Write the script once here; every export is generate
 | segments | Exactly 3 segment names. |
 | single_winner_reason | Required only if one product wins every segment. |
 | render_composition | Remotion composition id (`Long16x9`). |
-| style_families | 3-4 FLUX style families used. |
+| style_families | Optional. One look shared by all stills. |
 | variation | category_order, micro_authority_device, hook_device, hook_type, opener_device, visual_motif. |
 | held_reveal | `{number, flips, segment}`. The number must not appear before the reveal. |
 | hook_options | `A: {line, type}`, `B: {scene_lines, type}`. |

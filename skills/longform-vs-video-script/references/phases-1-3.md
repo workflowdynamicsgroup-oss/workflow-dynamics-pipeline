@@ -5,7 +5,7 @@
 Send one message with the items below, then wait. Items 1 to 6 must be answered ("none" is valid for 4 and 5). Every other item has a default from `config.json` and may be left blank. Skip any item already answered in saved facts for this series and say so in one line.
 
 Required:
-1. Product A: name and affiliate link (GoHighLevel goes here if it is one of the two). Note if the VS page has separate anchors per product.
+1. Product A: name and affiliate link. Note if the VS page has separate anchors per product.
 2. Product B: name and affiliate link.
 3. Authority tier per product: research, demo, or hands-on. If hands-on: every component actually used and for how long. Unlisted components cannot carry first-person language. If vague, ask once more.
 4. Screen recordings already owned: product, exact screen, length. Plan only around these.

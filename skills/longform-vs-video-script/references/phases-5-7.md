@@ -6,8 +6,8 @@
 2. Manual checks (code cannot do these):
    - Narration file: numbers in words, every likely-mangled product name has a pronunciation entry.
    - Rhythm, hook and close feel, held-reveal timing, variation choices differ from the last log entry.
-   - R-NOFAKE: no still, clip, B-roll brief or backdrop resembles a named product's interface, logo or pricing page. Review stills and clips as a contact sheet per batch.
-   - R-GENLIMIT: Wan clips only in the named scenes, none showing a face, text or UI.
+   - R-NOFAKE (manual review): no still, clip, B-roll brief or backdrop resembles a named product's interface, logo or pricing page. Review stills and clips as a contact sheet per batch. Also check for banned props (R-NOPROPS: coins, clocks, piggy banks, money) and faces that look wrong.
+   - R-GENLIMIT: Wan clips only in the named scenes (hook, ending, up to two call-to-action backdrops), none showing text or a product UI.
    - R-HONESTY: numbers identical across scenes and on screen; tier-gated features carry tier and price; first-person claims map to listed components; both products win at least one segment; no scene contradicts the recommendation.
    - Conversion beats present: reveal totals, ratings with counts, risk reversal, cost of inaction, objection beat, use-my-link-first. Offers and guarantees match the VS page.
    - R-SKIP / R-APIFY-CAP: each item ran or carries a "confirm skip"; keyword labeled validated or assumed; the brief visibly changed the script; spend at or under cap by actor.

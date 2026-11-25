@@ -81,12 +81,6 @@ def uncontracted(src):
     scene(src, "Problem 2")["line"] = "A wrong pick costs hours every week and you do not get them back."
 
 
-@case("R-GHL-FIRST")
-def ghl_second(src):
-    a, b = src["video"]["product_a"], src["video"]["product_b"]
-    src["video"]["product_a"], src["video"]["product_b"] = "Beta Funnels", "GoHighLevel"
-
-
 @case("R-CTA")
 def offer_without_link(src):
     scene(src, "Offer")["line"] = "Pick one today and get started."
@@ -120,10 +114,10 @@ def broll_over_share(src):
 
 @case("R-SHOTS")
 def shot_too_long(src):
-    # B-roll runs up to 8 s, so cut every multi-shot B-roll scene down to one shot: the long ones then break the cap
-    for sc in src["scenes"]:
-        if len(sc["shots"]) >= 2 and all(sh["tag"] == "B-ROLL" for sh in sc["shots"]):
-            sc["shots"] = sc["shots"][:1]
+    # a brand logo runs at most 5 s, so a long line under a lone logo shot cannot be filled
+    sc = with_tag(src, "ASSET-BRAND")
+    sc["shots"] = sc["shots"][:1]
+    sc["line"] = " ".join(["Here is a long spoken line that keeps going and going."] * 5)
 
 
 @case("R-SHOTS")
@@ -141,7 +135,7 @@ def broll_without_search(src):
 @case("R-BROLL")
 def broll_not_means_picture(src):
     sc = with_tag(src, "B-ROLL")
-    sc["shots"][0]["text"] = "Gold coins stacking into a tall tower on a clean white desk in soft morning daylight."
+    sc["shots"][0]["text"] = "A plain silver laptop seen from behind on a clean desk in soft morning daylight."
 
 
 @case("R-COMPARE")
@@ -201,6 +195,36 @@ def broll_negation(src):
 
 def banned(src):
     scene(src, "Problem 1")["line"] = "In a world where tools multiply, you're choosing the system your business runs on, not just another tool you can drop next month. Pick badly and you'll feel it in every launch, every follow-up, and every invoice for a year."
+
+
+@case("R-NOPROPS")
+def coin_in_flux_prompt(src):
+    first = next(iter(src["prompts"]["flux"]))
+    src["prompts"]["flux"][first]["text"] += " A smooth gold coin rests in the foreground."
+
+
+@case("R-NOPROPS")
+def clock_in_wan_prompt(src):
+    first = next(iter(src["prompts"]["wan"]))
+    src["prompts"]["wan"][first]["text"] += " A clock face spins in the center of the frame."
+
+
+@case("R-STILL")
+def flux_off_palette(src):
+    first = next(iter(src["prompts"]["flux"]))
+    src["prompts"]["flux"][first]["text"] = src["prompts"]["flux"][first]["text"].replace("electric blue", "teal") + " Soft haze drifts across it."
+
+
+@case("R-GENLIMIT")
+def wan_outside_allowed_scenes(src):
+    # the retired reveal-transition and bridge clips: a Wan clip in a problem scene is not allowed any more
+    sc = next(s for s in src["scenes"] if s["section"] == "problem" and s["shots"])
+    sc["shots"] = [{"tag": "GEN-VIDEO", "role": "hook", "prompt_id": "w1"}] + sc["shots"][1:]
+
+
+@case("R-APIFY-CAP")
+def apify_spend_over_cap(src):
+    src["research_summary"]["apify_spend"] = {"keyword_fanout": 2.5, "youtube_search": 3.0}
 
 
 CASES.append(("banned_phrase", "R-VOICE", None, banned))
