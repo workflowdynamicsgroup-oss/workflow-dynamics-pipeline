@@ -1,28 +1,27 @@
-"""Write render/manifest-<slug>.json: package-relative destination -> R2 key, for every shot in shots.json.
-Usage: python3 render/make_manifest.py SHOTS_JSON BROLL_MAP_JSON OUT_JSON
-Wan clips: newest good run per shot (WAN_KEYS below). Stills: flux-ghl-a3 (a4 redos were copied over a3 photos 5, 9, 13, 15).
-Screens and pictures come from inputs/gohighlevel-vs-systeme-io/. Shot 62a (both pricing pages) is composed on the pod from the two screenshots.
+"""Write the render manifest: package-relative destination -> R2 key, for every shot in shots.json.
+Usage: python3 render/make_manifest.py SHOTS_JSON BROLL_MAP_JSON ASSETS_JSON OUT_JSON
+ASSETS_JSON (render/assets-<slug>.json) names the keys per video: {"wan": {shotId: key}, "still": {shotId: key},
+  "picture": {shotId: key}, "screen": {shotId: key}, "extra": [{"dest","key"}]}.
+BROLL_MAP_JSON entries: an entry with "key" (a Wan clip used as B-roll) uses that key; otherwise the key is
+  outputs/<run>/<file>, with run defaulting to "broll-ghl-b1" when the entry has no "run".
+Every shot of kind wan, still, picture, screen and broll must have a key; a missing one is listed and the script exits 1.
 """
 import json, sys
-shots = json.load(open(sys.argv[1])); bmap = {b["shot"]: b["clip_file"] for b in json.load(open(sys.argv[2]))}
-IN = "inputs/gohighlevel-vs-systeme-io/gohighlevel-vs-systeme-io-"
-WAN = {"1a": "wan-ghl-a2/wan_w1_1a", "63a": "wan-ghl-a2/wan_w2_63a", "87a": "wan-ghl-a2/wan_w3_87a", "88a": "wan-ghl-a2/wan_w4_88a",
-       "37b": "wan-ghl-b3/wan_w5_37b", "40a": "wan-ghl-a2/wan_w6_40a", "42a": "wan-ghl-b3/wan_w7_42a", "44a": "wan-ghl-b3/wan_w8_44a",
-       "3b": "wan-ghl-b1/wan_w9_3b", "28b": "wan-ghl-b1/wan_w10_28b", "53a": "wan-ghl-b1/wan_w11_53a", "30b": "wan-ghl-b1/wan_w12_30b",
-       "21a": "wan-ghl-b1/wan_w13_21a"}
-STILL = {sid: f"photo_{i}" for i, sid in enumerate("7a 11a 13a 18a 22a 26a 32a 36a 39a 41a 43a 46a 54a 60a 64a 71a".split(), 1)}
-PIC = {"2a": "brand-gohighlevel-on-light.png", "3a": "brand-systeme-io.png", "10a": "brand-gohighlevel-on-light.png"}
-SCR = {"29a": "asset-gohighlevel-pricing.png", "37a": "asset-systeme-io-pricing.png"}
+shots, bmap_list, assets, out_p = json.load(open(sys.argv[1])), json.load(open(sys.argv[2])), json.load(open(sys.argv[3])), sys.argv[4]
+bmap = {b["shot"]: b.get("key") or f"outputs/{b.get('run', 'broll-ghl-b1')}/{b['file']}" for b in bmap_list}
+SRC = {"wan": ("clips", "mp4", assets.get("wan", {})), "still": ("stills", "png", assets.get("still", {})),
+       "picture": ("assets", "png", assets.get("picture", {})), "screen": ("assets", "png", assets.get("screen", {})),
+       "broll": ("broll", "mp4", bmap)}
 out, missing = [], []
 for s in shots:
-    sid, k = s["id"], s["kind"]
-    if k == "wan": out.append({"dest": f"clips/{sid}.mp4", "key": f"outputs/{WAN[sid]}.mp4"} if sid in WAN else None)
-    elif k == "still": out.append({"dest": f"stills/{sid}.png", "key": f"outputs/flux-ghl-a3/{STILL[sid]}.png"})
-    elif k == "broll": out.append({"dest": f"broll/{sid}.mp4", "key": bmap[sid]} if sid in bmap else None)
-    elif k == "picture": out.append({"dest": f"assets/{sid}.png", "key": IN + PIC[sid]})
-    elif k == "screen":
-        if sid in SCR: out.append({"dest": f"assets/{sid}.png", "key": IN + SCR[sid]})
-    if out and out[-1] is None: missing.append(sid); out.pop()
-out += [{"dest": "assets/_gohighlevel-pricing.png", "key": IN + SCR["29a"]}, {"dest": "assets/_systeme-pricing.png", "key": IN + SCR["37a"]}]
-json.dump(out, open(sys.argv[3], "w"), indent=1)
+    k = s["kind"]
+    if k in SRC:
+        folder, ext, table = SRC[k]
+        if s["id"] in table: out.append({"dest": f"{folder}/{s['id']}.{ext}", "key": table[s["id"]]})
+        else: missing.append(s["id"])
+    elif k == "stat": pass
+    else: missing.append(s["id"])
+out += assets.get("extra", [])
+json.dump(out, open(out_p, "w"), indent=1)
 print(f"MANIFEST_OK files={len(out)} missing={missing}")
+sys.exit(1 if missing else 0)

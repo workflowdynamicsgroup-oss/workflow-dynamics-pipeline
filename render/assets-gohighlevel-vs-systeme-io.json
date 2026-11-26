@@ -1,0 +1,9 @@
+{
+ "wan": {"1a": "outputs/wan-ghl-b1/wan_w1_1a.mp4", "86a": "outputs/wan-ghl-b1/wan_w3_86a.mp4", "87a": "outputs/wan-ghl-b1/wan_w5_87a.mp4", "89a": "outputs/wan-ghl-b1/wan_w4_89a.mp4"},
+ "still": {"17a": "outputs/flux-ghl-b2/photo_1.png", "25a": "outputs/flux-ghl-b2/photo_2.png", "50a": "outputs/flux-ghl-b1/photo_3.png"},
+ "picture": {"9a": "inputs/gohighlevel-vs-systeme-io/gohighlevel-vs-systeme-io-brand-gohighlevel-on-light.png", "9b": "inputs/gohighlevel-vs-systeme-io/gohighlevel-vs-systeme-io-brand-systeme-io.png"},
+ "screen": {"33a": "inputs/gohighlevel-vs-systeme-io/systeme-funnel-steps.png", "35a": "inputs/gohighlevel-vs-systeme-io/systeme-calendar-availability.png",
+            "37a": "inputs/gohighlevel-vs-systeme-io/workflow-builder-new-workflow_0016-01.png", "38a": "inputs/gohighlevel-vs-systeme-io/systeme-contacts-blurred-v2.png",
+            "39a": "inputs/gohighlevel-vs-systeme-io/agency-dashboard-overview_0005-16.png", "39b": "inputs/gohighlevel-vs-systeme-io/launchpad-getting-started-checklist_0002-08.png"},
+ "extra": []
+}

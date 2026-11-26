@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Pod wrapper: render the long-form video with Remotion on a CPU pod.
-# Env: RUN_NAME (required), PKG_PREFIX (R2 folder holding props-16x9.json, narration.wav, avatar/*.webm, manifest.json; required),
+# Env: RUN_NAME (required), PKG_PREFIX (R2 folder holding props-16x9.json, narration.wav, avatar-block1..3.webm, manifest.json; required),
 #   FRAMES (optional, for example 0-499 for a 20 s test at 25 fps; empty = full video), COMP (default Long16x9),
 #   WATCHDOG (default 2400 s), HOLD (default 60 s), secrets RUN_POD_API_KEY, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ENDPOINT.
 # Local simulation: SIM_SRC=<dir mirroring R2 keys> SIM=1 skips the self-delete, the boto3 install and the browser download check.
@@ -61,7 +61,8 @@ p = os.environ["PKG_PREFIX"].rstrip("/")
 os.makedirs("/root/pkg/avatar", exist_ok=True); os.makedirs("/root/pkg/narration", exist_ok=True)
 for key, dest in ((p + "/props-16x9.json", "/root/pkg/props-16x9.json"), (p + "/manifest.json", "/root/pkg/manifest.json"),
                   (p + "/narration.wav", "/root/pkg/narration/narration.wav"),
-                  (p + "/avatar-block1.webm", "/root/pkg/avatar/avatar-block1.webm"), (p + "/avatar-block2.webm", "/root/pkg/avatar/avatar-block2.webm")):
+                  (p + "/avatar-block1.webm", "/root/pkg/avatar/avatar-block1.webm"), (p + "/avatar-block2.webm", "/root/pkg/avatar/avatar-block2.webm"),
+                  (p + "/avatar-block3.webm", "/root/pkg/avatar/avatar-block3.webm")):
     s3.download_file("workflowdynamic", key, dest); print("PKG_FILE_OK", key, os.path.getsize(dest))
 PY
   FR=${PIPESTATUS[0]}
@@ -82,10 +83,12 @@ if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
 fi
 ffmpeg -version 2>&1 | head -1 | tee -a "$LOG"
 cd ..
-# shot 62a: both pricing pages side by side, GoHighLevel on the left
-python3 -c "import PIL" 2>/dev/null || python3 -m pip install -q --break-system-packages pillow >/dev/null 2>&1
-python3 render/compose_62a.py "$PKG/assets/_gohighlevel-pricing.png" "$PKG/assets/_systeme-pricing.png" "$PKG/assets/62a.png" 2>&1 | tee -a "$LOG"
-[ "${PIPESTATUS[0]}" = 0 ] || die "62a compose failed"
+# shot 62a: both pricing pages side by side, GoHighLevel on the left (only when the manifest brought the two source pictures)
+if [ -f "$PKG/assets/_gohighlevel-pricing.png" ] && [ -f "$PKG/assets/_systeme-pricing.png" ]; then
+  python3 -c "import PIL" 2>/dev/null || python3 -m pip install -q --break-system-packages pillow >/dev/null 2>&1
+  python3 render/compose_62a.py "$PKG/assets/_gohighlevel-pricing.png" "$PKG/assets/_systeme-pricing.png" "$PKG/assets/62a.png" 2>&1 | tee -a "$LOG"
+  [ "${PIPESTATUS[0]}" = 0 ] || die "62a compose failed"
+fi
 cd remotion
 if [ "$SIM" != 1 ]; then
   BL=$(ldd node_modules/.remotion/chrome-headless-shell/*/*/chrome-headless-shell 2>/dev/null | grep -c 'not found' || true)
