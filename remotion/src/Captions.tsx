@@ -18,14 +18,21 @@ export const Captions: React.FC<{words: CaptionWord[]; vertical: boolean}> = ({w
   const groupStart = Math.floor(current / perGroup) * perGroup;
   const group = words.slice(groupStart, groupStart + perGroup);
 
+  // A dark plate sits behind the words so they stay readable on white cards and screenshots.
   const base: React.CSSProperties = {
     position: 'absolute',
     fontFamily: 'Arial Black, Arial, sans-serif',
     fontWeight: 900,
     color: '#fff',
-    textShadow: '0 0 6px rgba(11,31,58,0.95), 0 2px 4px rgba(11,31,58,0.95), 2px 2px 0 rgba(11,31,58,0.9), -2px -2px 0 rgba(11,31,58,0.9), 2px -2px 0 rgba(11,31,58,0.9), -2px 2px 0 rgba(11,31,58,0.9)',
     textTransform: 'uppercase',
-    lineHeight: 1.1,
+    lineHeight: 1.45,
+  };
+  const plate: React.CSSProperties = {
+    background: 'rgba(11,31,58,0.82)',
+    padding: vertical ? '6px 18px' : '4px 18px',
+    borderRadius: 12,
+    boxDecorationBreak: 'clone',
+    WebkitBoxDecorationBreak: 'clone',
   };
   const style: React.CSSProperties = vertical
     ? {...base, left: 65, right: 65, top: 640, fontSize: 66, textAlign: 'center'}
@@ -33,11 +40,13 @@ export const Captions: React.FC<{words: CaptionWord[]; vertical: boolean}> = ({w
 
   return (
     <div style={style}>
-      {group.map((w, i) => (
-        <React.Fragment key={`${groupStart + i}`}>
-          <span style={{color: groupStart + i === current ? '#1E6BFF' : '#fff'}}>{w.word}</span>{' '}
-        </React.Fragment>
-      ))}
+      <span style={plate}>
+        {group.map((w, i) => (
+          <React.Fragment key={`${groupStart + i}`}>
+            <span style={{color: groupStart + i === current ? '#4DA3FF' : '#fff'}}>{w.word}</span>{' '}
+          </React.Fragment>
+        ))}
+      </span>
     </div>
   );
 };
