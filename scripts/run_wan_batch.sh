@@ -69,6 +69,7 @@ if [ "$DRY_RUN" != 1 ] || [ "${TEST_COPY:-0}" = 1 ]; then  # TEST_COPY=1 lets a 
   done < <(find "$MODEL_SRC" -type f -print0)
   got=$(find "$MODEL_DST" -type f -printf '%s\n' | awk '{s+=$1} END{print s}'); log "COPY_DONE bytes=$got want=$WANT_BYTES seconds=$(( $(date +%s) - t1 ))"
   [ "$got" = "$WANT_BYTES" ] || die "model copy is $got bytes, want $WANT_BYTES"
+  bash scripts/verify_copy.sh "$MODEL_SRC" "$MODEL_DST" 2>&1 | tee -a "$LOG"; [ "${PIPESTATUS[0]}" = 0 ] || die "model copy differs from the volume and could not be repaired"
 fi
 ok=0; bad=0; t2=$(date +%s)
 while IFS=$'\t' read -r id shot secs prompt <&3; do
